@@ -10,6 +10,7 @@ try {
     (new \Magnolia\Main())
         // ->register(\Magnolia\Server\Camera::class)
         ->register(\Magnolia\Server\EnvInfo::class)
+        ->register(\Magnolia\Server\API\EnvInfo::class)
         ->run();
 
 } catch (Exception $e) {
