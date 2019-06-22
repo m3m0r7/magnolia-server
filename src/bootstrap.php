@@ -1,9 +1,10 @@
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
-$env = new Dotenv\Dotenv(__DIR__);
+$env = Dotenv\Dotenv::create(__DIR__);
 $env->load();
 
-(new \Magnolia\Main(
-
-))->run();
+(new \Magnolia\Main([
+    \Magnolia\Server\Camera::class,
+    \Magnolia\Server\EnvInfo::class,
+]))->run();
