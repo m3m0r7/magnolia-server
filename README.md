@@ -1,5 +1,7 @@
 # Magnolia-Server
-The Magnolia use Swoole on PHP IoT. This is exciting implementation.
+The Magnolia is **PHP IoT** project which using `Swoole`. 
+This is exciting implementation.
+
 In the feature, This repository receive `Environment status` and `HTTP Live streaming camera` from RaspberryPi.
 
 You can get details here:
