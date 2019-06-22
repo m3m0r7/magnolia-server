@@ -3,9 +3,32 @@
         "monolog/monolog": "^1.24",
         "vlucas/phpdotenv": "^3.4"
     },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.4",
+        "friendsofphp/php-cs-fixer": "^2.15",
+        "brainmaestro/composer-git-hooks": "^2.7"
+    },
     "autoload": {
         "psr-4": {
             "Magnolia\\": "magnolia/"
+        }
+    },
+    "scripts": {
+        "cs": "phpcs -n --standard=phpcs.xml src",
+        "fix": "php-cs-fixer fix",
+        "tests": [
+            "@cs",
+            "@fix"
+        ],
+        "post-install-cmd": "[ \"$COMPOSER_DEV_MODE\" = 1 ] && cghooks add --ignore-lock",
+        "post-update-cmd": "[ \"$COMPOSER_DEV_MODE\" = 1 ] && cghooks update"
+    },
+    "extra": {
+        "hooks": {
+            "pre-commit": [
+                "git diff-index --cached --name-only HEAD | vendor/bin/php-cs-fixer fix",
+                "git update-index --again"
+            ]
         }
     }
 }
