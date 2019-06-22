@@ -20,9 +20,20 @@ abstract class AbstractClient
     public function __construct(Stream $client)
     {
         $this->client = $client;
+
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,
             $this->loggerLevel,
+        );
+
+        $this->logger->info(
+            'Connected client',
+            [
+                stream_socket_get_name(
+                    $this->client->getResource(),
+                    true
+                )
+            ]
         );
     }
 }

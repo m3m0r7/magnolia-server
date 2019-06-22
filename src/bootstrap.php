@@ -4,11 +4,13 @@ require __DIR__ . '/vendor/autoload.php';
 $env = Dotenv\Dotenv::create(__DIR__);
 $env->load();
 
+date_default_timezone_set(getenv('TIMEZONE'));
+
 try {
-    (new \Magnolia\Main([
-        \Magnolia\Server\Camera::class,
-        \Magnolia\Server\EnvInfo::class,
-    ]))->run();
+    (new \Magnolia\Main())
+        // ->register(\Magnolia\Server\Camera::class)
+        ->register(\Magnolia\Server\EnvInfo::class)
+        ->run();
 
 } catch (Exception $e) {
     fwrite(

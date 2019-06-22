@@ -42,9 +42,7 @@ class GenericServer extends AbstractServer implements ServerInterface
                     /**
                      * @var ClientInterface $clientClass
                      */
-                    $clientClass = new $clientClassName(
-                        new Stream($client),
-                    );
+                    $clientClass = new $clientClassName(new Stream($client));
                     $clientClass->start();
                 }
             }

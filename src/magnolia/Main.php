@@ -9,9 +9,10 @@ final class Main
 {
     private $serverList = [];
 
-    public function __construct(array $serverList = [])
+    public function register(string $className): self
     {
-        $this->serverList = $serverList;
+        $this->serverList[] = $className;
+        return $this;
     }
 
     public function run(): void

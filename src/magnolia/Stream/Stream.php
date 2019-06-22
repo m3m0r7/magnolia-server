@@ -1,6 +1,8 @@
 <?php
 namespace Magnolia\Stream;
 
+use Magnolia\Utility\Functions;
+
 final class Stream
 {
     protected $stream;
@@ -13,5 +15,15 @@ final class Stream
     public function getResource()
     {
         return $this->stream;
+    }
+
+    public function read(int $byte): string
+    {
+        $body = '';
+        do {
+            $read = fread($this->stream, $byte);
+            $body .= $read;
+        } while (strlen($body) < $byte);
+        return $body;
     }
 }

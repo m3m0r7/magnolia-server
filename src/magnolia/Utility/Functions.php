@@ -17,4 +17,18 @@ class Functions
         );
         return $logger;
     }
+
+    public static function dump(...$texts)
+    {
+        static $handle = null;
+        if ($handle === null) {
+            $handle = fopen('/dev/stderr', 'w');
+        }
+        foreach ($texts as $text) {
+            fwrite(
+                $handle,
+                $text
+            );
+        }
+    }
 }
