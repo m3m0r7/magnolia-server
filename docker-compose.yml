@@ -1,0 +1,10 @@
+version: "3"
+services:
+  php:
+    build: infra/php
+    container_name: php
+    tty: true
+    volumes:
+      - ./src:/var/src
+    ports:
+      - 8080:80
