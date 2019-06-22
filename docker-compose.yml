@@ -9,3 +9,6 @@ services:
     ports:
       - 30000:30000
       - 30001:30001
+  redis:
+    build: infra/redis
+    container_name: redis
