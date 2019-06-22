@@ -42,4 +42,4 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 
 # Run PHP
 WORKDIR /var/src
-CMD composer install &>/dev/null && php /var/src/bootstrap.php
+CMD composer -n install &>/dev/null && php /var/src/bootstrap.php
