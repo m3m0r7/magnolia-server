@@ -1,23 +1,23 @@
 <?php
-namespace Magnolia\Server;
+namespace Magnolia\Client;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Magnolia\Utility\Functions;
 
-abstract class AbstractServer
+abstract class AbstractClient
 {
-    protected $loggerChannelName = 'none';
+    protected $loggerChannelName = null;
     protected $logger;
     protected $loggerLevel = Logger::INFO;
+    protected $client;
 
-    public function __construct()
+    public function __construct($client)
     {
+        $this->client = $client;
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,
             $this->loggerLevel,
         );
     }
-
-    abstract public function run(): void;
 }

@@ -7,4 +7,5 @@ services:
     volumes:
       - ./src:/var/src
     ports:
-      - 8080:80
+      - 30000:30000
+      - 30001:30001
