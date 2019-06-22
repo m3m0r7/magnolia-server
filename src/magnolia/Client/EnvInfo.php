@@ -11,7 +11,15 @@ final class EnvInfo extends AbstractClient implements ClientInterface
 
     public function start(): void
     {
-        while (true) {
+        $readStartingTag = current(unpack('C', $this->client->read(1)));
+        if ($readStartingTag !== 0xFF) {
+            return;
+        }
+
+        $receivingCount = current(unpack('C', $this->client->read(1)));
+
+        for ($i = 0; $i < $receivingCount; $receivingCount--) {
+            // read KindTag
             $kindTag = current(unpack('C', $this->client->read(1)));
             $this->logger->debug(
                 'Received Kind Tag',
@@ -30,9 +38,6 @@ final class EnvInfo extends AbstractClient implements ClientInterface
 
                     $value = (float) ($highByte . '.' . $lowByte);
                     break;
-            }
-            if ($value === null) {
-                continue;
             }
             $this->logger->debug(
                 'Received packet',

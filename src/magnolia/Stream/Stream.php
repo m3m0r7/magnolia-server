@@ -17,6 +17,12 @@ final class Stream
         return $this->stream;
     }
 
+    public function write($data): self
+    {
+        fwrite($this->stream, $data);
+        return $this;
+    }
+
     public function read(int $byte): string
     {
         $body = '';
