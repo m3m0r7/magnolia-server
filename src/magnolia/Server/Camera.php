@@ -1,17 +1,32 @@
 <?php
 namespace Magnolia\Server;
 
-final class Camera extends AbstractServer implements ServerInterface
+use Monolog\Logger;
+
+final class Camera extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'Camera';
 
-    public function run(): void
+    protected $loggerLevel = Logger::DEBUG;
+
+    public function getServerName(): string
     {
-        $this->logger->info('Started camera receiving server.');
-        while (true) {
-            $this->logger->info('From camera');
-            sleep(mt_rand(1, 3));
-        }
+        return 'Camera';
+    }
+
+    public function getListenHost(): string
+    {
+        return getenv('CAMERA_LISTEN_HOST');
+    }
+
+    public function getListenPort(): int
+    {
+        return getenv('CAMERA_LISTEN_PORT');
+    }
+
+    public function getClientClassName()
+    {
+        return \Magnolia\Client\Camera::class;
     }
 }
 

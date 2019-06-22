@@ -5,43 +5,28 @@ use Magnolia\Client\ClientInterface;
 use Magnolia\Exception\ServerInterruptException;
 use Monolog\Logger;
 
-final class EnvInfo extends AbstractServer implements ServerInterface
+final class EnvInfo extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'EnvInfo';
     protected $loggerLevel = Logger::DEBUG;
 
-    public function run(): void
+    public function getServerName(): string
     {
-        $host = getenv('ENV_INFO_LISTEN_HOST');
-        $port = getenv('ENV_INFO_LISTEN_PORT');
-        $this->logger->info(
-            'Started EnvInfo receiving server.',
-            [
-                "$host:$port",
-            ]
-        );
+        return 'EnvInfo';
+    }
 
-        while (true) {
-            $this->logger->info('Instantiate a server');
-            $server = stream_socket_server(
-                sprintf(
-                    'tcp://%s:%d',
-                    $host,
-                    $port,
-                )
-            );
+    public function getListenHost(): string
+    {
+        return getenv('ENV_INFO_LISTEN_HOST');
+    }
 
-            if ($server === false) {
-                throw new ServerInterruptException('Server cannot wakeup.');
-            }
+    public function getListenPort(): int
+    {
+        return getenv('ENV_INFO_LISTEN_PORT');
+    }
 
-            while (true) {
-                $this->logger->info('Listening started.');
-                while ($client = @stream_socket_accept($server)) {
-                    (new \Magnolia\Client\EnvInfo($client))
-                        ->start();
-                }
-            }
-        }
+    public function getClientClassName()
+    {
+        return \Magnolia\Client\EnvInfo::class;
     }
 }

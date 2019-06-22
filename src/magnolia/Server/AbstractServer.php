@@ -20,4 +20,24 @@ abstract class AbstractServer
     }
 
     abstract public function run(): void;
+
+    public function getServerName(): string
+    {
+        return null;
+    }
+
+    public function getListenHost(): string
+    {
+        return null;
+    }
+
+    public function getListenPort(): int
+    {
+        return null;
+    }
+
+    public function getClientClassName()
+    {
+        return null;
+    }
 }
