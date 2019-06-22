@@ -9,11 +9,14 @@ final class EnvInfo extends AbstractClient implements ClientInterface
 
     public function start(): void
     {
-        $this->logger->info('Connected client', [
-            stream_socket_get_name(
-                $this->client,
-                true
-            )
-        ]);
+        $this->logger->info(
+            'Connected client',
+            [
+                stream_socket_get_name(
+                    $this->client->getResource(),
+                    true
+                )
+            ]
+        );
     }
 }

@@ -3,6 +3,7 @@ namespace Magnolia\Server;
 
 use Magnolia\Client\ClientInterface;
 use Magnolia\Exception\ServerInterruptException;
+use Magnolia\Stream\Stream;
 use Monolog\Logger;
 
 class GenericServer extends AbstractServer implements ServerInterface
@@ -41,7 +42,9 @@ class GenericServer extends AbstractServer implements ServerInterface
                     /**
                      * @var ClientInterface $clientClass
                      */
-                    $clientClass = new $clientClassName($client);
+                    $clientClass = new $clientClassName(
+                        new Stream($client),
+                    );
                     $clientClass->start();
                 }
             }

@@ -11,7 +11,7 @@ final class Camera extends AbstractClient implements ClientInterface
     {
         $this->logger->info('Connected client', [
             stream_socket_get_name(
-                $this->client,
+                $this->client->getResource(),
                 true
             )
         ]);
