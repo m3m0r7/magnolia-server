@@ -1,4 +1,9 @@
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
-(new \Magnolia\Main());
+$env = new Dotenv\Dotenv(__DIR__);
+$env->load();
+
+(new \Magnolia\Main(
+
+))->run();
