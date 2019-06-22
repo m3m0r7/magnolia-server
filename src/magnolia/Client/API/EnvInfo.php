@@ -17,5 +17,33 @@ final class EnvInfo extends AbstractClient implements ClientInterface
 
     public function start(): void
     {
+        $responseHeaders = [];
+        $readLength = 0;
+        while ($line = $this->client->readLine()) {
+            if (ltrim($line, "\r") === "\n") {
+                break;
+            }
+            if ($line === '') {
+                // No data.
+                return;
+            }
+
+            $readLength += strlen($line);
+            if (((int) getenv('MAX_HEADER_LENGTH')) < $readLength) {
+                return;
+            }
+
+            $responseHeaders[] = rtrim($line, "\n");
+        }
+
+        // Write headers section.
+        $this->client
+            ->writeLine("HTTP/1.1 200 OK")
+            ->writeLine("Content-Length: 4")
+            ->writeLine("");
+
+        // Write body sections.
+        $this->client
+            ->write("TEST");
     }
 }

@@ -14,7 +14,7 @@ class GenericServer extends AbstractServer implements ServerInterface
     public function run(): void
     {
         $this->logger->info(
-            'Started EnvInfo receiving server.',
+            'Started receiving server.',
             [
                 "{$this->getListenHost()}:{$this->getListenPort()}",
             ]

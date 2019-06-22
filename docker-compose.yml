@@ -9,8 +9,8 @@ services:
     ports:
       - 30000:30000
       - 30001:30001
-      - 31000:30000
-      - 31001:30001
+      - 31000:31000
+      - 31001:31001
   redis:
     build: infra/redis
     container_name: redis
