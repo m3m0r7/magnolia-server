@@ -43,14 +43,15 @@ final class Stream
         return $this->write($data . "\n");
     }
 
-    public function read(int $byte = 1): string
+    public function read(int $bytes = 1): string
     {
-        $body = '';
+        $remaining = $bytes;
+        $data = '';
         do {
-            $read = fread($this->stream, $byte);
-            $body .= $read;
-        } while (strlen($body) < $byte);
-        return $body;
+            $data .= fread($this->stream, $remaining);
+            $remaining = $bytes - strlen($data);
+        } while ($remaining > 0);
+        return $data;
     }
 
     public function readLine(): string
