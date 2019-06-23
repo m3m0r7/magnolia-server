@@ -13,7 +13,6 @@ final class Camera extends AbstractClient implements ClientInterface
         while (true) {
             while ($sizePacket = $this->client->read(4)) {
                 $size = current(unpack('L', $sizePacket));
-                var_dump($size);
                 if ($size === 0) {
                     continue;
                 }

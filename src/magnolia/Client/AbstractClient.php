@@ -6,11 +6,12 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Magnolia\Utility\Functions;
 
-abstract class AbstractClient
+abstract class AbstractClient implements ClientInterface
 {
     protected $loggerChannelName = null;
     protected $logger;
     protected $loggerLevel = Logger::INFO;
+    protected $data = [];
 
     /**
      * @var Stream $client
@@ -36,4 +37,12 @@ abstract class AbstractClient
             ]
         );
     }
+
+    public function addParameters($data): ClientInterface
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    abstract public function start(): void;
 }

@@ -7,6 +7,8 @@ interface ClientInterface
 {
     public function __construct(Stream $client);
 
+    public function addParameters($data): ClientInterface;
+
     public function start(): void;
 }
 
