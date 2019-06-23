@@ -10,7 +10,6 @@ use Magnolia\Server\ServerInterface;
 final class EnvInfo extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'APIEnvInfo.Server';
-    protected $loggerLevel = Logger::DEBUG;
 
     public function getServerName(): string
     {

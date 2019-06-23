@@ -13,7 +13,6 @@ final class EnvInfo extends AbstractClient implements ClientInterface
     use \Magnolia\Traits\Redis;
 
     protected $loggerChannelName = 'APIEnvInfo.Client';
-    protected $loggerLevel = Logger::DEBUG;
 
     public function start(): void
     {
@@ -38,14 +37,24 @@ final class EnvInfo extends AbstractClient implements ClientInterface
 
         $parameters = $this->getRedis()->hGetAll(RedisKeys::ENV_INFO);
 
-        $data = json_encode(
-            [
-                'temperature'       => (float) $parameters[KindEnv::KIND_TEMPERATURE],
-                'humidity'          => (float) $parameters[KindEnv::KIND_HUMIDITY],
-                'pressure'          => (float) $parameters[KindEnv::KIND_PRESSURE],
-                'cpu_temperature'   => (float) $parameters[KindEnv::KIND_CPU_TEMPERATURE],
-            ]
+        $data = [
+            'temperature'       => (float) $parameters[KindEnv::KIND_TEMPERATURE],
+            'humidity'          => (float) $parameters[KindEnv::KIND_HUMIDITY],
+            'pressure'          => (float) $parameters[KindEnv::KIND_PRESSURE],
+            'cpu_temperature'   => (float) $parameters[KindEnv::KIND_CPU_TEMPERATURE],
+        ];
+
+        // Adjustment values
+        $data['temperature'] = round(
+            $data['temperature'] - 22,
+            2
         );
+        $data['humidity'] = round(
+            $data['humidity'] * 2.52,
+            2
+        );
+
+        $data = json_encode($data);
 
         // Enable Buffer
         $this->client->enableBuffer(true);

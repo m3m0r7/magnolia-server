@@ -8,7 +8,6 @@ use Monolog\Logger;
 final class EnvInfo extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'EnvInfo.Server';
-    protected $loggerLevel = Logger::DEBUG;
 
     public function getServerName(): string
     {

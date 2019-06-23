@@ -11,7 +11,6 @@ final class EnvInfo extends AbstractClient implements ClientInterface
     use \Magnolia\Traits\Redis;
 
     protected $loggerChannelName = 'EnvInfo.Client';
-    protected $loggerLevel = Logger::DEBUG;
 
     public function start(): void
     {

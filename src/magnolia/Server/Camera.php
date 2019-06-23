@@ -6,7 +6,6 @@ use Monolog\Logger;
 final class Camera extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'Camera';
-
     protected $loggerLevel = Logger::DEBUG;
 
     public function getServerName(): string

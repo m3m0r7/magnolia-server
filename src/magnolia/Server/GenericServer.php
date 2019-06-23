@@ -30,7 +30,9 @@ class GenericServer extends AbstractServer implements ServerInterface
 
             $this->logger->info(
                 'Server is running.',
-                "{$this->getListenHost()}:{$this->getListenPort()}"
+                [
+                    "{$this->getListenHost()}:{$this->getListenPort()}"
+                ]
             );
 
             while (true) {
