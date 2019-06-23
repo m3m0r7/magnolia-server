@@ -39,7 +39,7 @@ abstract class AbstractServer implements ServerInterface
         return null;
     }
 
-    public function getClientClassName()
+    public function getInstantiationClientClassName(): ?string
     {
         return null;
     }

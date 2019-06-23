@@ -1,4 +1,5 @@
 <?php
+
 require __DIR__ . '/vendor/autoload.php';
 
 $env = Dotenv\Dotenv::create(__DIR__);
@@ -9,6 +10,7 @@ date_default_timezone_set(getenv('TIMEZONE'));
 try {
     (new \Magnolia\Main())
         ->register(\Magnolia\Timer\ClientConnectionsCollector::class)
+        ->register(\Magnolia\Server\StreamingPipeline::class)
         ->register(\Magnolia\Server\Camera::class)
         ->register(\Magnolia\Server\EnvInfo::class)
         ->register(\Magnolia\Server\API\EnvInfo::class)

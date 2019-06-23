@@ -13,6 +13,6 @@ interface ServerInterface
 
     public function getListenPort(): int;
 
-    public function getClientClassName();
+    public function getInstantiationClientClassName(): ?string;
 }
 

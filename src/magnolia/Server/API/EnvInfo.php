@@ -25,7 +25,7 @@ final class EnvInfo extends GenericServer implements ServerInterface
         return getenv('API_ENV_INFO_LISTEN_PORT');
     }
 
-    public function getClientClassName()
+    public function getInstantiationClientClassName(): ?string
     {
         return \Magnolia\Client\API\EnvInfo::class;
     }

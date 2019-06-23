@@ -1,7 +1,6 @@
 <?php
 namespace Magnolia\Server;
 
-use Magnolia\Client\ClientInterface;
 use Magnolia\Contract\ServerInterface;
 use Magnolia\Exception\ServerInterruptException;
 use Magnolia\Stream\Stream;
@@ -14,7 +13,7 @@ class GenericServer extends AbstractServer implements ServerInterface
      */
     public function run(): void
     {
-        $clientClassName = $this->getClientClassName();
+        $instantiationClientClassName = $this->getInstantiationClientClassName();
 
         while (true) {
             $server = stream_socket_server(
@@ -43,11 +42,15 @@ class GenericServer extends AbstractServer implements ServerInterface
             while (true) {
                 $this->logger->info('Listening started.');
                 while ($client = @stream_socket_accept($server)) {
-                    // Check connections,.
+
+                    // Check channel connections.
                     if ($channel->isFull()) {
                         $this->logger->info(
                             'Failed to connect because it is over MAX_CONNECTIONS.'
                         );
+
+                        // Force closing session.
+                        fclose($client);
                         continue;
                     }
 
@@ -61,7 +64,10 @@ class GenericServer extends AbstractServer implements ServerInterface
                         $this->logger->info($channel->length() . ' connections currently.');
                     }
 
-                    go([new $clientClassName($clientStream, $this->channels), 'start']);
+                    // If $instantiationClientClassName is null, it means the server not having reacting event.
+                    if ($instantiationClientClassName !== null) {
+                        go([new $instantiationClientClassName($clientStream, $this->channels), 'start']);
+                    }
                 }
             }
         }

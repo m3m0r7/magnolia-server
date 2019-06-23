@@ -1,7 +1,6 @@
 <?php
 namespace Magnolia\Server;
 
-use Magnolia\Client\ClientInterface;
 use Magnolia\Contract\ServerInterface;
 use Magnolia\Exception\ServerInterruptException;
 use Monolog\Logger;
@@ -25,7 +24,7 @@ final class EnvInfo extends GenericServer implements ServerInterface
         return getenv('ENV_INFO_LISTEN_PORT');
     }
 
-    public function getClientClassName()
+    public function getInstantiationClientClassName(): ?string
     {
         return \Magnolia\Client\EnvInfo::class;
     }
