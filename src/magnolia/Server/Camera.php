@@ -1,6 +1,7 @@
 <?php
 namespace Magnolia\Server;
 
+use Magnolia\Contract\ServerInterface;
 use Monolog\Logger;
 
 final class Camera extends GenericServer implements ServerInterface

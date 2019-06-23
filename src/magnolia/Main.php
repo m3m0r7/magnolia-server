@@ -1,17 +1,17 @@
 <?php
 namespace Magnolia;
 
-use Magnolia\Server\ServerInterface;
+use Magnolia\Contract\TimerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
 final class Main
 {
-    private $serverList = [];
+    private $events = [];
 
     public function register(string $className): self
     {
-        $this->serverList[] = $className;
+        $this->events[] = $className;
         return $this;
     }
 
@@ -21,17 +21,28 @@ final class Main
 
         // create channels
         $channels = [];
-        foreach ($this->serverList as $serverClass) {
-            $channels[$serverClass] = new \Swoole\Coroutine\Channel(
+        foreach ($this->events as $eventClass) {
+            $channels[$eventClass] = new \Swoole\Coroutine\Channel(
                 (int) getenv('MAX_CONNECTIONS')
             );
         }
 
-        foreach ($this->serverList as $serverClass) {
+        foreach ($this->events as $eventClass) {
             /**
-             * @var ServerInterface $serverClass
+             * @var \Magnolia\Contract\ServerInterface $serverClass
              */
-            go([new $serverClass($channels), 'run']);
+            $event = new $eventClass($channels);
+            if ($event instanceof TimerInterface) {
+                // if event type is a timer, then run with Swoole\Timer.
+                $channels[$eventClass]->push(
+                    \Swoole\Timer::tick(
+                        $event::getIntervalTime(),
+                        [$event, 'run']
+                    )
+                );
+            } else {
+                go([$event, 'run']);
+            }
         }
         \Swoole\Event::wait();
     }

@@ -1,12 +1,12 @@
 <?php
 namespace Magnolia\Client\API;
 
+use Magnolia\Contract\ClientInterface;
 use Magnolia\Enum\KindEnv;
 use Magnolia\Enum\RedisKeys;
 use Magnolia\Utility\Functions;
 use Monolog\Logger;
 use Magnolia\Client\AbstractClient;
-use Magnolia\Client\ClientInterface;
 
 final class EnvInfo extends AbstractClient implements ClientInterface
 {

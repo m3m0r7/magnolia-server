@@ -1,5 +1,5 @@
 <?php
-namespace Magnolia\Client;
+namespace Magnolia\Contract;
 
 use Magnolia\Stream\Stream;
 

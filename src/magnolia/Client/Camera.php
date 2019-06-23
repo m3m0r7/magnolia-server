@@ -1,6 +1,7 @@
 <?php
 namespace Magnolia\Client;
 
+use Magnolia\Contract\ClientInterface;
 use Monolog\Logger;
 
 final class Camera extends AbstractClient implements ClientInterface

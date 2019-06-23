@@ -1,6 +1,7 @@
 <?php
 namespace Magnolia\Client;
 
+use Magnolia\Contract\ClientInterface;
 use Magnolia\Stream\Stream;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;

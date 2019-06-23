@@ -1,11 +1,10 @@
 <?php
 namespace Magnolia\Server\API;
 
-use Magnolia\Client\ClientInterface;
+use Magnolia\Contract\ServerInterface;
 use Magnolia\Exception\ServerInterruptException;
 use Monolog\Logger;
 use Magnolia\Server\GenericServer;
-use Magnolia\Server\ServerInterface;
 
 final class EnvInfo extends GenericServer implements ServerInterface
 {

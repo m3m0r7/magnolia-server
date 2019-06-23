@@ -1,8 +1,10 @@
 <?php
-namespace Magnolia\Server;
+namespace Magnolia\Contract;
 
 interface ServerInterface
 {
+    public function __construct(array &$channels = []);
+
     public function run(): void;
 
     public function getServerName(): string;

@@ -1,11 +1,12 @@
 <?php
 namespace Magnolia\Server;
 
+use Magnolia\Contract\ServerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Magnolia\Utility\Functions;
 
-abstract class AbstractServer
+abstract class AbstractServer implements ServerInterface
 {
     protected $loggerChannelName = 'none';
     protected $logger;

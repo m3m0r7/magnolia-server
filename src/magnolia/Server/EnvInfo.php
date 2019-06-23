@@ -2,6 +2,7 @@
 namespace Magnolia\Server;
 
 use Magnolia\Client\ClientInterface;
+use Magnolia\Contract\ServerInterface;
 use Magnolia\Exception\ServerInterruptException;
 use Monolog\Logger;
 

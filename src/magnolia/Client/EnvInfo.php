@@ -1,6 +1,7 @@
 <?php
 namespace Magnolia\Client;
 
+use Magnolia\Contract\ClientInterface;
 use Magnolia\Enum\KindEnv;
 use Magnolia\Enum\RedisKeys;
 use Magnolia\Utility\Functions;
