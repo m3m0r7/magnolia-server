@@ -6,9 +6,15 @@ use Magnolia\Utility\Functions;
 final class Stream
 {
     protected $stream;
+    protected $buffers = '';
+    protected $buffering = false;
 
     public function __construct($stream)
     {
+        stream_set_timeout($stream, 1, 0);
+        stream_set_write_buffer($stream, 0);
+        stream_set_read_buffer($stream, 0);
+
         $this->stream = $stream;
     }
 
@@ -17,18 +23,27 @@ final class Stream
         return $this->stream;
     }
 
-    public function write($data): self
+    public function enableBuffer(bool $enable): self
     {
-        fwrite($this->stream, $data);
+        $this->buffering = $enable;
         return $this;
     }
 
-    public function writeLine($data): self
+    public function write(string $data): self
+    {
+        $this->buffers .= $data;
+        if (!$this->buffering) {
+            $this->emit();
+        }
+        return $this;
+    }
+
+    public function writeLine(string $data): self
     {
         return $this->write($data . "\n");
     }
 
-    public function read(int $byte): string
+    public function read(int $byte = 1): string
     {
         $body = '';
         do {
@@ -46,5 +61,13 @@ final class Stream
     public function close(): void
     {
         fclose($this->stream);
+    }
+
+    public function emit()
+    {
+        fwrite($this->stream, $this->buffers);
+
+        // Do empty buffers
+        $this->buffers = '';
     }
 }

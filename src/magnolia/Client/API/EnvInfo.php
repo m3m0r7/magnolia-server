@@ -36,14 +36,35 @@ final class EnvInfo extends AbstractClient implements ClientInterface
             $responseHeaders[] = rtrim($line, "\n");
         }
 
+        $parameters = $this->getRedis()->hGetAll(RedisKeys::ENV_INFO);
+
+        $data = json_encode(
+            [
+                'temperature'       => (float) $parameters[KindEnv::KIND_TEMPERATURE],
+                'humidity'          => (float) $parameters[KindEnv::KIND_HUMIDITY],
+                'pressure'          => (float) $parameters[KindEnv::KIND_PRESSURE],
+                'cpu_temperature'   => (float) $parameters[KindEnv::KIND_CPU_TEMPERATURE],
+            ]
+        );
+
+        // Enable Buffer
+        $this->client->enableBuffer(true);
+
         // Write headers section.
         $this->client
             ->writeLine("HTTP/1.1 200 OK")
-            ->writeLine("Content-Length: 4")
+            ->writeLine("Content-Type: application/json")
+            ->writeLine("Content-Length: " . strlen($data))
             ->writeLine("");
 
         // Write body sections.
         $this->client
-            ->write("TEST");
+            ->write($data);
+
+        // Emit
+        $this->client->emit();
+
+        // Close connection
+        $this->client->close();
     }
 }

@@ -13,17 +13,9 @@ class GenericServer extends AbstractServer implements ServerInterface
      */
     public function run(): void
     {
-        $this->logger->info(
-            'Started receiving server.',
-            [
-                "{$this->getListenHost()}:{$this->getListenPort()}",
-            ]
-        );
-
         $clientClassName = $this->getClientClassName();
 
         while (true) {
-            $this->logger->info('Instantiate a server');
             $server = stream_socket_server(
                 sprintf(
                     'tcp://%s:%d',
@@ -33,17 +25,20 @@ class GenericServer extends AbstractServer implements ServerInterface
             );
 
             if ($server === false) {
-                throw new ServerInterruptException('Server cannot wakeup.');
+                throw new ServerInterruptException('Failed to start server.');
             }
+
+            $this->logger->info(
+                'Server is running.',
+                "{$this->getListenHost()}:{$this->getListenPort()}"
+            );
 
             while (true) {
                 $this->logger->info('Listening started.');
                 while ($client = @stream_socket_accept($server)) {
-                    /**
-                     * @var ClientInterface $clientClass
-                     */
-                    $clientClass = new $clientClassName(new Stream($client));
-                    $clientClass->start();
+                    // In one case, Google Chrome send 2 connections (pre-flight and fetching document data).
+                    // So, It need asynchronously processing.
+                    go([new $clientClassName(new Stream($client)), 'start']);
                 }
             }
         }
