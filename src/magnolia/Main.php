@@ -18,11 +18,20 @@ final class Main
     public function run(): void
     {
         \Swoole\Runtime::enableCoroutine();
-        foreach ($this->serverList as $server) {
+
+        // create channels
+        $channels = [];
+        foreach ($this->serverList as $serverClass) {
+            $channels[$serverClass] = new \Swoole\Coroutine\Channel(
+                (int) getenv('MAX_CONNECTIONS')
+            );
+        }
+
+        foreach ($this->serverList as $serverClass) {
             /**
-             * @var ServerInterface $server
+             * @var ServerInterface $serverClass
              */
-            go([new $server(), 'run']);
+            go([new $serverClass($channels), 'run']);
         }
         \Swoole\Event::wait();
     }

@@ -11,6 +11,7 @@ use Magnolia\Client\ClientInterface;
 final class EnvInfo extends AbstractClient implements ClientInterface
 {
     use \Magnolia\Traits\Redis;
+    use \Magnolia\Traits\ClientManageable;
 
     protected $loggerChannelName = 'APIEnvInfo.Client';
 
@@ -24,11 +25,13 @@ final class EnvInfo extends AbstractClient implements ClientInterface
             }
             if ($line === '') {
                 // No data.
+                $this->disconnect();
                 return;
             }
 
             $readLength += strlen($line);
             if (((int) getenv('MAX_HEADER_LENGTH')) < $readLength) {
+                $this->disconnect();
                 return;
             }
 
@@ -74,6 +77,6 @@ final class EnvInfo extends AbstractClient implements ClientInterface
         $this->client->emit();
 
         // Close connection
-        $this->client->close();
+        $this->disconnect();
     }
 }

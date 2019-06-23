@@ -5,6 +5,8 @@ use Monolog\Logger;
 
 final class Camera extends AbstractClient implements ClientInterface
 {
+    use \Magnolia\Traits\ClientManageable;
+
     protected $loggerChannelName = 'Camera.Client';
     protected $loggerLevel = Logger::DEBUG;
 

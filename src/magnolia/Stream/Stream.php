@@ -8,6 +8,7 @@ final class Stream
     protected $stream;
     protected $buffers = '';
     protected $buffering = false;
+    protected $peer = null;
 
     public function __construct($stream)
     {
@@ -15,7 +16,17 @@ final class Stream
         stream_set_write_buffer($stream, 0);
         stream_set_read_buffer($stream, 0);
 
+        $this->peer = stream_socket_get_name(
+            $stream,
+            true
+        );
+
         $this->stream = $stream;
+    }
+
+    public function getPeer(): string
+    {
+        return $this->peer;
     }
 
     public function getResource()
@@ -64,7 +75,7 @@ final class Stream
         fclose($this->stream);
     }
 
-    public function emit()
+    public function emit(): void
     {
         fwrite($this->stream, $this->buffers);
 

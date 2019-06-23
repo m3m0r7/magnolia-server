@@ -9,8 +9,8 @@ date_default_timezone_set(getenv('TIMEZONE'));
 try {
     (new \Magnolia\Main())
         ->register(\Magnolia\Server\Camera::class)
-//        ->register(\Magnolia\Server\EnvInfo::class)
-//        ->register(\Magnolia\Server\API\EnvInfo::class)
+        ->register(\Magnolia\Server\EnvInfo::class)
+        ->register(\Magnolia\Server\API\EnvInfo::class)
         ->run();
 
 } catch (Exception $e) {

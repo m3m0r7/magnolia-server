@@ -35,12 +35,32 @@ class GenericServer extends AbstractServer implements ServerInterface
                 ]
             );
 
+            /**
+             * @var \Swoole\Coroutine\Channel $channel
+             */
+            $channel = $this->channels[static::class];
             while (true) {
                 $this->logger->info('Listening started.');
                 while ($client = @stream_socket_accept($server)) {
+                    // Check connections,.
+                    if ($channel->isFull()) {
+                        $this->logger->info(
+                            'Failed to connect because it is over MAX_CONNECTIONS.'
+                        );
+                        continue;
+                    }
+
                     // In one case, Google Chrome send 2 connections (pre-flight and fetching document data).
                     // So, It need asynchronously processing.
-                    go([new $clientClassName(new Stream($client)), 'start']);
+                    $clientStream = new Stream($client);
+                    $channel->push($clientStream);
+
+                    $connections = $channel->length();
+                    if ($connections > 1) {
+                        $this->logger->info($channel->length() . ' connections currently.');
+                    }
+
+                    go([new $clientClassName($clientStream, $this->channels), 'start']);
                 }
             }
         }

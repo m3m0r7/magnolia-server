@@ -10,9 +10,11 @@ abstract class AbstractServer
     protected $loggerChannelName = 'none';
     protected $logger;
     protected $loggerLevel = Logger::INFO;
+    protected $channels = [];
 
-    public function __construct()
+    public function __construct(array &$channels = [])
     {
+        $this->channels = $channels;
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,
             $this->loggerLevel,
