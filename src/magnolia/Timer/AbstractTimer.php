@@ -20,6 +20,8 @@ abstract class AbstractTimer implements TimerInterface
             $this->loggerChannelName,
             $this->loggerLevel,
         );
+
+        $this->logger->info('Timer is running.');
     }
 
 

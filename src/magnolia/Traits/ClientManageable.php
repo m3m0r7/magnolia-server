@@ -14,10 +14,10 @@ trait ClientManageable
              */
             $clients = [];
             while (!$channel->isEmpty()) {
-                $client = $channel->pop();
                 /**
                  * @var Stream $client
                  */
+                $client = $channel->pop();
                 if ($client === $this->client) {
                     $this->logger->info(
                         'Disconnected',

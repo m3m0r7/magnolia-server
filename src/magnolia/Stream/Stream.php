@@ -82,4 +82,9 @@ final class Stream
         // Do empty buffers
         $this->buffers = '';
     }
+
+    public function isDisconnected(): bool
+    {
+        return feof($this->stream);
+    }
 }
