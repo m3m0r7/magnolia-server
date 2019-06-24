@@ -9,7 +9,6 @@ date_default_timezone_set(getenv('TIMEZONE'));
 
 try {
     (new \Magnolia\Main())
-        ->register(\Magnolia\Timer\ClientConnectionsCollector::class)
         ->register(\Magnolia\Server\StreamingPipeline::class)
         ->register(\Magnolia\Server\Camera::class)
         ->register(\Magnolia\Server\EnvInfo::class)

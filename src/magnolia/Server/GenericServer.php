@@ -13,8 +13,6 @@ class GenericServer extends AbstractServer implements ServerInterface
      */
     public function run(): void
     {
-        $instantiationClientClassName = $this->getInstantiationClientClassName();
-
         while (true) {
             $server = stream_socket_server(
                 sprintf(
@@ -65,8 +63,16 @@ class GenericServer extends AbstractServer implements ServerInterface
                     }
 
                     // If $instantiationClientClassName is null, it means the server not having reacting event.
-                    if ($instantiationClientClassName !== null) {
-                        go([new $instantiationClientClassName($clientStream, $this->channels), 'start']);
+                    if ($this->instantiationClientClassName !== null) {
+                        $instantiationClientClassName = $this->instantiationClientClassName;
+                        go([
+                            new $instantiationClientClassName(
+                                $clientStream,
+                                $this->channels,
+                                $this->synchronizers,
+                            ),
+                            'start'
+                        ]);
                     }
                 }
             }

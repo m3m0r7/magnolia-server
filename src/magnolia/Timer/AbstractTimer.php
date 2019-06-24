@@ -12,10 +12,12 @@ abstract class AbstractTimer implements TimerInterface
     protected $logger;
     protected $loggerLevel = Logger::INFO;
     protected $channels = [];
+    protected $synchronizers = [];
 
-    public function __construct(array &$channels = [])
+    public function __construct(array &$channels = [], array &$synchronizers = [])
     {
         $this->channels = $channels;
+        $this->synchronizers = $synchronizers;
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,
             $this->loggerLevel,
@@ -23,7 +25,6 @@ abstract class AbstractTimer implements TimerInterface
 
         $this->logger->info('Timer is running.');
     }
-
 
     abstract static public function getIntervalTime(): int;
 }

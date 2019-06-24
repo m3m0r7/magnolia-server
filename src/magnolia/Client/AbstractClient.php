@@ -14,15 +14,17 @@ abstract class AbstractClient implements ClientInterface
     protected $loggerLevel = Logger::INFO;
     protected $data = [];
     protected $channels = [];
+    protected $synchronizers = [];
 
     /**
      * @var Stream $client
      */
     protected $client;
 
-    public function __construct(Stream $client, array &$channels = [])
+    public function __construct(Stream $client, array &$channels = [], array &$synchronizers = [])
     {
         $this->client = $client;
+        $this->synchronizers = $synchronizers;
         $this->channels = $channels;
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,

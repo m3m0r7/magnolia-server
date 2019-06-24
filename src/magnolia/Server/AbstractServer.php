@@ -12,10 +12,13 @@ abstract class AbstractServer implements ServerInterface
     protected $logger;
     protected $loggerLevel = Logger::INFO;
     protected $channels = [];
+    protected $instantiationClientClassName = null;
+    protected $synchronizers = [];
 
-    public function __construct(array &$channels = [])
+    public function __construct(array &$channels = [], array &$synchronizers = [])
     {
         $this->channels = $channels;
+        $this->synchronizers = $synchronizers;
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,
             $this->loggerLevel,
@@ -35,11 +38,6 @@ abstract class AbstractServer implements ServerInterface
     }
 
     public function getListenPort(): int
-    {
-        return null;
-    }
-
-    public function getInstantiationClientClassName(): ?string
     {
         return null;
     }

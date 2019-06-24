@@ -9,6 +9,7 @@ use Magnolia\Server\GenericServer;
 final class EnvInfo extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'APIEnvInfo.Server';
+    protected $instantiationClientClassName = \Magnolia\Client\API\EnvInfo::class;
 
     public function getServerName(): string
     {
@@ -23,10 +24,5 @@ final class EnvInfo extends GenericServer implements ServerInterface
     public function getListenPort(): int
     {
         return getenv('API_ENV_INFO_LISTEN_PORT');
-    }
-
-    public function getInstantiationClientClassName(): ?string
-    {
-        return \Magnolia\Client\API\EnvInfo::class;
     }
 }

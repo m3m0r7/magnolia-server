@@ -12,7 +12,5 @@ interface ServerInterface
     public function getListenHost(): string;
 
     public function getListenPort(): int;
-
-    public function getInstantiationClientClassName(): ?string;
 }
 

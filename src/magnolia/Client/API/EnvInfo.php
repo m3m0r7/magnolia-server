@@ -57,6 +57,12 @@ final class EnvInfo extends AbstractClient implements ClientInterface
             2
         );
 
+        foreach ($data as &$value) {
+            if ($value <= 0) {
+                $value = null;
+            }
+        }
+
         $data = json_encode($data);
 
         // Enable Buffer

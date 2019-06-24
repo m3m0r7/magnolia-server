@@ -3,17 +3,18 @@ namespace Magnolia\Traits;
 
 trait Redis
 {
-    public function getRedis(): \Redis
+    private $redisConnection = null;
+
+    public function getRedis(): \Swoole\Coroutine\Redis
     {
-        static $redis = null;
-        if ($redis === null) {
-            $redis = new \Redis();
-            $redis->connect(
+        if ($this->redisConnection === null) {
+            $this->redisConnection = new \Swoole\Coroutine\Redis();
+            $this->redisConnection->connect(
                 getenv('REDIS_HOST'),
                 getenv('REDIS_PORT'),
             );
         }
 
-        return $redis;
+        return $this->redisConnection;
     }
 }

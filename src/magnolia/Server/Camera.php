@@ -8,6 +8,7 @@ final class Camera extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'Camera';
     protected $loggerLevel = Logger::DEBUG;
+    protected $instantiationClientClassName = \Magnolia\Client\Camera::class;
 
     public function getServerName(): string
     {
@@ -22,11 +23,6 @@ final class Camera extends GenericServer implements ServerInterface
     public function getListenPort(): int
     {
         return getenv('CAMERA_LISTEN_PORT');
-    }
-
-    public function getInstantiationClientClassName(): ?string
-    {
-        return \Magnolia\Client\Camera::class;
     }
 }
 

@@ -1,7 +1,9 @@
 <?php
 namespace Magnolia\Traits;
 
+use Magnolia\Enum\SynchronizerKeys;
 use Magnolia\Stream\Stream;
+use Magnolia\Synchronization\Synchronizer;
 use Swoole\Coroutine\Channel;
 
 trait ClientManageable
@@ -33,7 +35,6 @@ trait ClientManageable
                 $channel->push($client);
             }
         }
-
         $this->client->close();
     }
 }

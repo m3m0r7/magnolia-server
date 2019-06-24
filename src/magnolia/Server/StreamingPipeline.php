@@ -22,10 +22,5 @@ final class StreamingPipeline extends GenericServer implements ServerInterface
     {
         return getenv('STREAMING_PIPELINE_LISTEN_PORT');
     }
-
-    public function getInstantiationClientClassName(): ?string
-    {
-        return null;
-    }
 }
 

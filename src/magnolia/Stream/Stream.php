@@ -85,6 +85,6 @@ final class Stream
 
     public function isDisconnected(): bool
     {
-        return feof($this->stream);
+        return false;
     }
 }

@@ -2,6 +2,8 @@
 namespace Magnolia;
 
 use Magnolia\Contract\TimerInterface;
+use Magnolia\Enum\SynchronizerKeys;
+use Magnolia\Synchronization\Synchronizer;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -27,11 +29,17 @@ final class Main
             );
         }
 
+        $synchronizers = [];
+        $synchronizerKeyClassObject = new \ReflectionClass(SynchronizerKeys::class);
+        foreach (array_keys($synchronizerKeyClassObject->getConstants()) as $key) {
+            $synchronizers[$key] = new Synchronizer();
+        }
+
         foreach ($this->events as $eventClass) {
             /**
              * @var \Magnolia\Contract\ServerInterface $serverClass
              */
-            $event = new $eventClass($channels);
+            $event = new $eventClass($channels, $synchronizers);
             if ($event instanceof TimerInterface) {
                 // if event type is a timer, then run with Swoole\Timer.
                 $channels[$eventClass]->push(
