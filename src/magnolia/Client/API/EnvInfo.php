@@ -12,6 +12,7 @@ final class EnvInfo extends AbstractClient implements ClientInterface
 {
     use \Magnolia\Traits\Redis;
     use \Magnolia\Traits\ClientManageable;
+    use \Magnolia\Traits\HeaderReadable;
 
     protected $loggerChannelName = 'APIEnvInfo.Client';
 
@@ -19,23 +20,8 @@ final class EnvInfo extends AbstractClient implements ClientInterface
     {
         $responseHeaders = [];
         $readLength = 0;
-        while ($line = $this->client->readLine()) {
-            if (ltrim($line, "\r") === "\n") {
-                break;
-            }
-            if ($line === '') {
-                // No data.
-                $this->disconnect();
-                return;
-            }
-
-            $readLength += strlen($line);
-            if (((int) getenv('MAX_HEADER_LENGTH')) < $readLength) {
-                $this->disconnect();
-                return;
-            }
-
-            $responseHeaders[] = rtrim($line, "\n");
+        if (!$this->proceedHeaders()) {
+            return;
         }
 
         $parameters = $this->getRedis()->hGetAll(RedisKeys::ENV_INFO);

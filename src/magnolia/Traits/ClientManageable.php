@@ -20,7 +20,7 @@ trait ClientManageable
                  * @var Stream $client
                  */
                 $client = $channel->pop();
-                if ($client === $this->client) {
+                if ($client === $this->client || $client->isDisconnected()) {
                     $this->logger->info(
                         'Disconnected',
                         [$client->getPeer()]

@@ -8,6 +8,7 @@ RUN yum -y install http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 RUN yum -y install --enablerepo=remi-php73 \
     php \
     php-devel \
+    php-gd \
     php-mbstring \
     php-intl \
     php-pecl-zip \
@@ -17,6 +18,7 @@ RUN yum -y install --enablerepo=remi-php73 \
     php-pecl-runkit7 \
     php-pecl-redis \
     php-pecl-igbinary \
+    php-pecl-imagick \
     php-xml
 
 ## Install swoole from source

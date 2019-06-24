@@ -2,13 +2,15 @@
 namespace Magnolia\Stream;
 
 use Magnolia\Utility\Functions;
+use Ramsey\Uuid\Uuid;
 
-final class Stream
+class Stream
 {
     protected $stream;
     protected $buffers = '';
     protected $buffering = false;
     protected $peer = null;
+    protected $uuid = null;
 
     public function __construct($stream)
     {
@@ -22,6 +24,8 @@ final class Stream
         );
 
         $this->stream = $stream;
+
+        $this->uuid = Uuid::uuid4();
     }
 
     public function getPeer(): string
@@ -86,5 +90,10 @@ final class Stream
     public function isDisconnected(): bool
     {
         return false;
+    }
+
+    public function getUUID(): string
+    {
+        return $this->uuid;
     }
 }
