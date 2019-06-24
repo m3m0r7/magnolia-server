@@ -11,7 +11,7 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
 {
     use \Magnolia\Traits\ClientManageable;
     use \Magnolia\Traits\HeaderReadable;
-    
+
     protected $loggerChannelName = 'StreamingPipeline.Client';
 
     public function start(): void

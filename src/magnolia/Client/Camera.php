@@ -29,13 +29,11 @@ final class Camera extends AbstractClient implements ClientInterface
                 }
                 $packet = $this->client->read($size);
 
-                // Send image data to clients in coroutine
-                $clients = [];
-
                 // initialize to default value
                 $promiseCounter->set(0);
 
                 $targetClients = $channel->length();
+
                 while (!$channel->isEmpty()) {
                     $client = $channel->pop();
 
@@ -44,7 +42,12 @@ final class Camera extends AbstractClient implements ClientInterface
                      */
                     go(function () use ($client, $packet, $promiseCounter) {
                         // send packets
-                        $client->write($packet);
+                        $client
+                            ->writeLine('--' . $client->getUUID())
+                            ->writeLine('Content-Type: image/jpeg')
+                            ->writeLine('Content-Length: ' . strlen($packet))
+                            ->writeLine('')
+                            ->write($packet);
 
                         // add counter
                         $promiseCounter->add(1);
@@ -53,11 +56,6 @@ final class Camera extends AbstractClient implements ClientInterface
 
                 // Waiting proceeded.
                 while($promiseCounter->get() < $targetClients);
-
-                // re-push clients
-                foreach ($clients as $client) {
-                    $channel->push($client);
-                }
             }
         }
     }
