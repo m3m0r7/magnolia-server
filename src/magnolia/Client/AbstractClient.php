@@ -24,8 +24,8 @@ abstract class AbstractClient implements ClientInterface
     public function __construct(Stream $client, array &$channels = [], array &$synchronizers = [])
     {
         $this->client = $client;
-        $this->synchronizers = $synchronizers;
         $this->channels = $channels;
+        $this->synchronizers = $synchronizers;
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,
             $this->loggerLevel,

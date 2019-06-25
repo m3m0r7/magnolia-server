@@ -13,6 +13,7 @@ class GenericServer extends AbstractServer implements ServerInterface
      */
     public function run(): void
     {
+        \Swoole\Runtime::enableCoroutine();
         while (true) {
             $server = stream_socket_server(
                 sprintf(
@@ -40,7 +41,6 @@ class GenericServer extends AbstractServer implements ServerInterface
             while (true) {
                 $this->logger->info('Listening started.');
                 while ($client = @stream_socket_accept($server)) {
-
                     // Check channel connections.
                     if ($channel->isFull()) {
                         $this->logger->info(
@@ -58,9 +58,7 @@ class GenericServer extends AbstractServer implements ServerInterface
                     $channel->push($clientStream);
 
                     $connections = $channel->length();
-                    if ($connections > 1) {
-                        $this->logger->info($channel->length() . ' connections currently.');
-                    }
+                    $this->logger->info($channel->length() . ' connections currently.');
 
                     // If $instantiationClientClassName is null, it means the server not having reacting event.
                     if ($this->instantiationClientClassName !== null) {
@@ -69,7 +67,7 @@ class GenericServer extends AbstractServer implements ServerInterface
                             new $instantiationClientClassName(
                                 $clientStream,
                                 $this->channels,
-                                $this->synchronizers,
+                                $this->synchronizers
                             ),
                             'start'
                         ]);

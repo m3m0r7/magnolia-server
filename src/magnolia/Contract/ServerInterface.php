@@ -3,7 +3,7 @@ namespace Magnolia\Contract;
 
 interface ServerInterface
 {
-    public function __construct(array &$channels = []);
+    public function __construct(array &$channels = [], array &$synchronizers = []);
 
     public function run(): void;
 

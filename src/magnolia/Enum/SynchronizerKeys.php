@@ -3,5 +3,5 @@ namespace Magnolia\Enum;
 
 final class SynchronizerKeys implements EnumInterface
 {
-    const CLIENT_CONNECTION_COLLECTOR = 'CLIENT_CONNECTION_COLLECTOR';
+    const CLIENT_FROM_STREAMING_PIPELINE = 'CLIENT_FROM_STREAMING_PIPELINE';
 }

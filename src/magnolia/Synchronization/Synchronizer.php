@@ -47,18 +47,4 @@ final class Synchronizer
     {
         while($this->isLocked());
     }
-
-    public function synchronize(callable $callable)
-    {
-        $tickFunction = function () {
-            $this->unlock();
-            $this->lock();
-        };
-        register_tick_function($tickFunction);
-        declare(ticks = 1) {
-            $callable();
-        }
-        register_tick_function($tickFunction);
-        $this->unlock();
-    }
 }

@@ -41,6 +41,6 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
             ->writeLine('Content-Type: image/jpeg')
             ->writeLine('Content-Length: ' . strlen($image))
             ->writeLine('')
-            ->write($image);
+            ->writeLine($image);
     }
 }

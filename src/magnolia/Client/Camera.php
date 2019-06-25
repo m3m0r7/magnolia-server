@@ -2,7 +2,9 @@
 namespace Magnolia\Client;
 
 use Magnolia\Contract\ClientInterface;
+use Magnolia\Enum\SynchronizerKeys;
 use Magnolia\Stream\Stream;
+use Magnolia\Synchronization\Synchronizer;
 use Monolog\Logger;
 use Swoole\Coroutine\Channel;
 
@@ -15,47 +17,55 @@ final class Camera extends AbstractClient implements ClientInterface
 
     public function start(): void
     {
+        \Swoole\Runtime::enableCoroutine();
         /**
          * @var Channel $channel
+         * @var Synchronizer $synchronizer
          */
         $channel = $this->channels[\Magnolia\Server\StreamingPipeline::class];
+        $synchronizer = $this->synchronizers[SynchronizerKeys::CLIENT_FROM_STREAMING_PIPELINE];
 
-        $promiseCounter = new \Swoole\Atomic(0);
+
         while (true) {
             while ($sizePacket = $this->client->read(4)) {
                 $size = current(unpack('L', $sizePacket));
                 if ($size === 0) {
                     continue;
                 }
+
+                $this->logger->debug('Received ' . $size);
+
                 $packet = $this->client->read($size);
 
-                // initialize to default value
-                $promiseCounter->set(0);
+                go(function () use ($packet, $channel, $synchronizer) {
+                    $tempClientConnections = [];
 
-                $targetClients = $channel->length();
+                    while (!$channel->isEmpty()) {
+                        /**
+                         * @var Stream $client
+                         */
+                        $client = $channel->pop();
+                        if ($client->isDisconnected()) {
+                            continue;
+                        }
 
-                while (!$channel->isEmpty()) {
-                    $client = $channel->pop();
-
-                    /**
-                     * @var Stream $client
-                     */
-                    go(function () use ($client, $packet, $promiseCounter) {
                         // send packets
+                        $synchronizer->lock();
                         $client
                             ->writeLine('--' . $client->getUUID())
                             ->writeLine('Content-Type: image/jpeg')
                             ->writeLine('Content-Length: ' . strlen($packet))
                             ->writeLine('')
-                            ->write($packet);
+                            ->writeLine($packet);
+                        $synchronizer->unlock();
 
-                        // add counter
-                        $promiseCounter->add(1);
-                    });
-                }
+                        $tempClientConnections[] = $client;
+                    }
 
-                // Waiting proceeded.
-                while($promiseCounter->get() < $targetClients);
+                    while (!empty($tempClientConnections)) {
+                        $channel->push(array_pop($tempClientConnections));
+                    }
+                });
             }
         }
     }

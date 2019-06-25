@@ -19,8 +19,6 @@ final class Main
 
     public function run(): void
     {
-        \Swoole\Runtime::enableCoroutine();
-
         // create channels
         $channels = [];
         foreach ($this->events as $eventClass) {
@@ -35,9 +33,10 @@ final class Main
             $synchronizers[$key] = new Synchronizer();
         }
 
+
         foreach ($this->events as $eventClass) {
             /**
-             * @var \Magnolia\Contract\ServerInterface $serverClass
+             * @var \Magnolia\Contract\ServerInterface $event
              */
             $event = new $eventClass($channels, $synchronizers);
             if ($event instanceof TimerInterface) {
