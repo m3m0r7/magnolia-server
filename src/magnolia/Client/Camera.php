@@ -37,6 +37,11 @@ final class Camera extends AbstractClient implements ClientInterface
 
                 $packet = $this->client->read($size);
 
+                // if channel is empty, don't proceed to send image packet to client.
+                // otherwise, send image packet to client in a coroutine.
+                if ($channel->isEmpty()) {
+                    continue;
+                }
                 go(function () use ($packet, $channel, $synchronizer) {
                     $tempClientConnections = [];
 
@@ -63,7 +68,9 @@ final class Camera extends AbstractClient implements ClientInterface
                     }
 
                     while (!empty($tempClientConnections)) {
-                        $channel->push(array_pop($tempClientConnections));
+                        $channel->push(
+                            array_pop($tempClientConnections)
+                        );
                     }
                 });
             }
