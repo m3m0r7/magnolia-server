@@ -43,8 +43,16 @@ final class Synchronizer
         $this->status->set(static::IS_UNLOCKED);
     }
 
-    public function wait($timeout = 0): void
+    public function wait(int $timeout = 0): void
     {
         while($this->isLocked());
+    }
+
+    public function synchronize(callable $callback, int $timeout = 0): self
+    {
+        $this->lock();
+        $callback();
+        $this->unlock();
+        return $this;
     }
 }

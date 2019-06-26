@@ -14,6 +14,7 @@ abstract class AbstractServer implements ServerInterface
     protected $channels = [];
     protected $instantiationClientClassName = null;
     protected $synchronizers = [];
+    protected $synchronizeKey = null;
 
     public function __construct(array &$channels = [], array &$synchronizers = [])
     {

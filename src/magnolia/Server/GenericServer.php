@@ -4,6 +4,7 @@ namespace Magnolia\Server;
 use Magnolia\Contract\ServerInterface;
 use Magnolia\Exception\ServerInterruptException;
 use Magnolia\Stream\Stream;
+use Magnolia\Synchronization\Synchronizer;
 use Monolog\Logger;
 
 class GenericServer extends AbstractServer implements ServerInterface
@@ -36,8 +37,10 @@ class GenericServer extends AbstractServer implements ServerInterface
 
             /**
              * @var \Swoole\Coroutine\Channel $channel
+             * @var Synchronizer|null $synchronizer
              */
             $channel = $this->channels[static::class];
+            $synchronizer = $this->synchronizers[$this->synchronizeKey] ?? null;
             while (true) {
                 $this->logger->info('Listening started.');
                 while ($client = @stream_socket_accept($server)) {
@@ -54,24 +57,36 @@ class GenericServer extends AbstractServer implements ServerInterface
 
                     // In one case, Google Chrome send 2 connections (pre-flight and fetching document data).
                     // So, It need asynchronously processing.
-                    $clientStream = new Stream($client);
-                    $channel->push($clientStream);
+                    go(function () use ($synchronizer, $client, $channel) {
+                        // Lock with synchronizer, the stream does not allowed to write at the same time.
+                        if ($synchronizer !== null) {
+                            $synchronizer->lock();
+                        }
 
-                    $connections = $channel->length();
-                    $this->logger->info($channel->length() . ' connections currently.');
+                        $clientStream = new Stream($client);
+                        $channel->push($clientStream);
 
-                    // If $instantiationClientClassName is null, it means the server not having reacting event.
-                    if ($this->instantiationClientClassName !== null) {
-                        $instantiationClientClassName = $this->instantiationClientClassName;
-                        go([
-                            new $instantiationClientClassName(
-                                $clientStream,
-                                $this->channels,
-                                $this->synchronizers
-                            ),
-                            'start'
-                        ]);
-                    }
+                        // unlock
+                        if ($synchronizer !== null) {
+                            $synchronizer->unlock();
+                        }
+
+                        $connections = $channel->length();
+                        $this->logger->info($channel->length() . ' connections currently.');
+
+                        // If $instantiationClientClassName is null, it means the server not having reacting event.
+                        if ($this->instantiationClientClassName !== null) {
+                            $instantiationClientClassName = $this->instantiationClientClassName;
+                            go([
+                                new $instantiationClientClassName(
+                                    $clientStream,
+                                    $this->channels,
+                                    $this->synchronizers
+                                ),
+                                'start'
+                            ]);
+                        }
+                    });
                 }
             }
         }

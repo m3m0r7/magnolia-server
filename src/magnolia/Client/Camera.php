@@ -43,8 +43,9 @@ final class Camera extends AbstractClient implements ClientInterface
                     continue;
                 }
                 go(function () use ($packet, $channel, $synchronizer) {
-                    $tempClientConnections = [];
 
+                    $synchronizer->lock();
+                    $tempClientConnections = [];
                     while (!$channel->isEmpty()) {
                         /**
                          * @var Stream $client
@@ -55,14 +56,12 @@ final class Camera extends AbstractClient implements ClientInterface
                         }
 
                         // send packets
-                        $synchronizer->lock();
                         $client
                             ->writeLine('--' . $client->getUUID())
                             ->writeLine('Content-Type: image/jpeg')
                             ->writeLine('Content-Length: ' . strlen($packet))
                             ->writeLine('')
                             ->writeLine($packet);
-                        $synchronizer->unlock();
 
                         $tempClientConnections[] = $client;
                     }
@@ -72,6 +71,7 @@ final class Camera extends AbstractClient implements ClientInterface
                             array_pop($tempClientConnections)
                         );
                     }
+                    $synchronizer->unlock();
                 });
             }
         }
