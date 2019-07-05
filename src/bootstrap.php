@@ -13,6 +13,8 @@ try {
         ->register(\Magnolia\Server\Camera::class)
         ->register(\Magnolia\Server\EnvInfo::class)
         ->register(\Magnolia\Server\API\EnvInfo::class)
+        ->register(\Magnolia\Server\API\User::class)
+        ->register(\Magnolia\Server\API\Image::class)
         ->run();
 
 } catch (Exception $e) {
