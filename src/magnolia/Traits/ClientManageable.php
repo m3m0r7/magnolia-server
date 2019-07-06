@@ -48,6 +48,7 @@ trait ClientManageable
             ->writeLine("HTTP/1.1 200 OK")
             ->writeLine("Content-Type: application/json")
             ->writeLine("Content-Length: " . strlen($data))
+            ->writeLine("Access-Control-Allow-Origin: *")
             ->writeLine("");
 
         // Write body sections.
