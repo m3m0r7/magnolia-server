@@ -9,7 +9,7 @@ final class Info extends AbstractAPIContents implements APIContentsInterface
 {
     use \Magnolia\Traits\Redis;
 
-    public function getBody(): array
+    public function getResponseBody(): array
     {
 
         $parameters = $this->getRedis()->hGetAll(RedisKeys::ENV_INFO);

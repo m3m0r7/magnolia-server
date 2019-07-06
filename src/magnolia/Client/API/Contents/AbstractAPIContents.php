@@ -24,6 +24,12 @@ abstract class AbstractAPIContents implements APIContentsInterface
         $this->path = $path;
         $this->headers = $headers;
         $this->content = $content;
+
+        // Enable cookie
+        $this->enableCookie();
+
+        // Enable session
+        $this->getSession()->enable();
     }
 
     public function setStatus(int $status): APIContentsInterface
@@ -37,18 +43,18 @@ abstract class AbstractAPIContents implements APIContentsInterface
         return $this->status;
     }
 
-    public function getBody(): array
+    public function getResponseBody(): array
     {
         return [];
     }
 
-    public function getHeaders(): array
+    public function getResponseHeaders(): array
     {
-        return [];
+        return $this->buildCookies();
     }
 
     public function __toString(): string
     {
-        return json_encode($this->getBody());
+        return json_encode($this->getResponseBody());
     }
 }

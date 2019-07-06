@@ -6,15 +6,27 @@ use Magnolia\Contract\APIContentsInterface;
 trait CookieUsable
 {
     protected $cookies = [];
+    protected $setCookies = [];
+
+    public function enableCookie(): self
+    {
+        foreach (preg_split('/\s*;\s*/', $this->headers['cookie'] ?? '') as $cookie) {
+            [$key, $value] = preg_split('/\s*=\s*/', $cookie, 2);
+            $this->cookies[$key] = $value;
+        }
+        return $this;
+    }
 
     public function getCookies(): array
     {
-        return $this->cookies;
+        return array_map(function ($cookie) {
+            return $cookie['value'] ?? null;
+        }, $this->setCookies) + $this->cookies;
     }
 
     public function addCookie(string $name, string $value, int $expires, string $path = '/', bool $httpOnly = false): APIContentsInterface
     {
-        $this->cookies[$name] = [
+        $this->setCookies[$name] = [
             'value' => $value,
             'expires' => $expires,
             'path' => $path,
@@ -26,10 +38,13 @@ trait CookieUsable
     public function buildCookies(): array
     {
         $data = [];
-        foreach ($this->cookies as $name => $cookie) {
+        foreach ($this->setCookies as $name => $cookie) {
             $data[] = $name . '=' . $cookie['value']
                     . '; Path=' . $cookie['path']
                     . '; Expires=' . date('D, d m Y H:i:s', time() + $cookie['expires']) . ' GMT';
+        }
+        if (empty($data)) {
+            return [];
         }
         return ['Set-Cookie' => $data];
     }

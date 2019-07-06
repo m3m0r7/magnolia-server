@@ -8,7 +8,7 @@ use Magnolia\Traits\SessionUsable;
 
 final class Login extends AbstractAPIContents implements APIContentsInterface
 {
-    public function getBody(): array
+    public function getResponseBody(): array
     {
         if ($this->method !== 'POST') {
             return $this->returnBadRequest(
@@ -40,16 +40,11 @@ final class Login extends AbstractAPIContents implements APIContentsInterface
             );
         }
 
-        // Enable session
-        $this->getSession()->enable();
+        unset($user['password']);
+        $this->getSession()->write('user', $user);
 
         return [];
 
-    }
-
-    public function getHeaders(): array
-    {
-        return $this->buildCookies();
     }
 
     private function findUser($userName, $password): array

@@ -5,9 +5,9 @@ interface APIContentsInterface
 {
     public function __construct(string $method, string $path, array $headers = [], ?string $body = null);
 
-    public function getBody(): array;
+    public function getResponseBody(): array;
 
-    public function getHeaders(): array;
+    public function getResponseHeaders(): array;
 
     public function setStatus(int $status): APIContentsInterface;
 

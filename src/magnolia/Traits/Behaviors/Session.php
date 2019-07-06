@@ -9,6 +9,7 @@ class Session
     protected $APIContents;
     protected $sessionId = null;
     protected $sessions = [];
+    protected $handle;
 
     public function __construct(AbstractAPIContents $APIContents)
     {
@@ -24,7 +25,30 @@ class Session
         );
 
         // Expand session
+        $sessionFile = sys_get_temp_dir() . '/' . $this->getId();
+        $this->handle = fopen($sessionFile, 'c+');
+
+        if (flock($this->handle, LOCK_EX)) {
+            $data = stream_get_contents($this->handle);
+            if (!empty($data)) {
+                $this->sessions = unserialize($data);
+            }
+            flock($this->handle, LOCK_UN);
+        }
+
         return $this;
+    }
+
+    public function __destruct()
+    {
+        var_dump('call me?');
+        if (flock($this->handle, LOCK_EX)) {
+            fwrite(
+                $this->handle,
+                serialize($this->sessions)
+            );
+            flock($this->handle, LOCK_UN);
+        }
     }
 
     public function write($key, $value): self
@@ -33,9 +57,9 @@ class Session
         return $this;
     }
 
-    public function read($key): string
+    public function read($key): ?string
     {
-        return $this->sessions[$key];
+        return $this->sessions[$key] ?? null;
     }
 
     public function has($key): bool
@@ -43,7 +67,7 @@ class Session
         return array_key_exists($key, $this->sessions);
     }
 
-    public function getId()
+    public function getId(): string
     {
         $cookies = $this->APIContents->getCookies();
         $this->sessionId = $cookies[getenv('SESSION_ID')] ?? null;

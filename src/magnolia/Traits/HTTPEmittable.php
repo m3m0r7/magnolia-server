@@ -23,7 +23,7 @@ trait HTTPEmittable
             ->writeLine("Content-Length: " . strlen($body))
             ->writeLine("Access-Control-Allow-Origin: *");
 
-        foreach ($apiContents->getHeaders() as $header => $value) {
+        foreach ($apiContents->getResponseHeaders() as $header => $value) {
             if (!is_array($value)) {
                 $value = [$value];
             }
