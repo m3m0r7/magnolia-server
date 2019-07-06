@@ -10,7 +10,7 @@ services:
       - 30000:30000
       - 30001:30001
       - 31000:31000
-      - 31001:31001
+      - 32000:32000
   redis:
     build: infra/redis
     container_name: redis

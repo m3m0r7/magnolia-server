@@ -37,4 +37,27 @@ trait ClientManageable
         }
         $this->client->close();
     }
+
+    public function emit(string $data)
+    {
+        // Enable Buffer
+        $this->client->enableBuffer(true);
+
+        // Write headers section.
+        $this->client
+            ->writeLine("HTTP/1.1 200 OK")
+            ->writeLine("Content-Type: application/json")
+            ->writeLine("Content-Length: " . strlen($data))
+            ->writeLine("");
+
+        // Write body sections.
+        $this->client
+            ->write($data);
+
+        // Emit
+        $this->client->emit();
+
+        // Close connection
+        $this->disconnect();
+    }
 }

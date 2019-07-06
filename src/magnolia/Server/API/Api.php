@@ -6,23 +6,23 @@ use Magnolia\Exception\ServerInterruptException;
 use Monolog\Logger;
 use Magnolia\Server\GenericServer;
 
-final class EnvInfo extends GenericServer implements ServerInterface
+final class Api extends GenericServer implements ServerInterface
 {
-    protected $loggerChannelName = 'APIEnvInfo.Server';
-    protected $instantiationClientClassName = \Magnolia\Client\API\EnvInfo::class;
+    protected $loggerChannelName = 'API.Server';
+    protected $instantiationClientClassName = \Magnolia\Client\API\Api::class;
 
     public function getServerName(): string
     {
-        return 'APIEnvInfo';
+        return 'API';
     }
 
     public function getListenHost(): string
     {
-        return getenv('API_ENV_INFO_LISTEN_HOST');
+        return getenv('API_LISTEN_HOST');
     }
 
     public function getListenPort(): int
     {
-        return getenv('API_ENV_INFO_LISTEN_PORT');
+        return getenv('API_LISTEN_PORT');
     }
 }

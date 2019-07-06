@@ -12,9 +12,7 @@ try {
         ->register(\Magnolia\Server\StreamingPipeline::class)
         ->register(\Magnolia\Server\Camera::class)
         ->register(\Magnolia\Server\EnvInfo::class)
-        ->register(\Magnolia\Server\API\EnvInfo::class)
-        ->register(\Magnolia\Server\API\User::class)
-        ->register(\Magnolia\Server\API\Image::class)
+        ->register(\Magnolia\Server\API\Api::class)
         ->run();
 
 } catch (Exception $e) {
