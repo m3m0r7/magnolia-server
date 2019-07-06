@@ -24,8 +24,13 @@ trait HTTPEmittable
             ->writeLine("Access-Control-Allow-Origin: *");
 
         foreach ($apiContents->getHeaders() as $header => $value) {
-            $this->client
-                ->writeLine($header . ': ' . $value);
+            if (!is_array($value)) {
+                $value = [$value];
+            }
+            foreach ($value as $record) {
+                $this->client
+                    ->writeLine($header . ': ' . $record);
+            }
         }
 
         $this->client->writeLine("");

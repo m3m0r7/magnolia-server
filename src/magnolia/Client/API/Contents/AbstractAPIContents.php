@@ -2,9 +2,16 @@
 namespace Magnolia\Client\API\Contents;
 
 use Magnolia\Contract\APIContentsInterface;
+use Magnolia\Traits\APIResponseable;
+use Magnolia\Traits\CookieUsable;
+use Magnolia\Traits\SessionUsable;
 
 abstract class AbstractAPIContents implements APIContentsInterface
 {
+    use APIResponseable;
+    use CookieUsable;
+    use SessionUsable;
+
     protected $method;
     protected $path;
     protected $headers;

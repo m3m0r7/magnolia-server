@@ -3,11 +3,11 @@ namespace Magnolia\Client\API\Contents;
 
 use Magnolia\Contract\APIContentsInterface;
 use Magnolia\Traits\APIResponseable;
+use Magnolia\Traits\CookieUsable;
+use Magnolia\Traits\SessionUsable;
 
 final class Login extends AbstractAPIContents implements APIContentsInterface
 {
-    use APIResponseable;
-
     public function getBody(): array
     {
         if ($this->method !== 'POST') {
@@ -40,10 +40,16 @@ final class Login extends AbstractAPIContents implements APIContentsInterface
             );
         }
 
-        // TODO: add session
+        // Enable session
+        $this->getSession()->enable();
 
         return [];
 
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->buildCookies();
     }
 
     private function findUser($userName, $password): array
