@@ -25,7 +25,6 @@ final class Camera extends AbstractClient implements ClientInterface
         $channel = $this->channels[\Magnolia\Server\StreamingPipeline::class];
         $synchronizer = $this->synchronizers[SynchronizerKeys::CLIENT_FROM_STREAMING_PIPELINE];
 
-
         while (true) {
             while ($sizePacket = $this->client->read(4)) {
                 $size = current(unpack('L', $sizePacket));

@@ -1,23 +1,24 @@
 <?php
 namespace Magnolia\Client\API\Contents;
 
+use Magnolia\Contract\APIContentsInterface;
 use Magnolia\Enum\KindEnv;
 use Magnolia\Enum\RedisKeys;
 
-final class Info extends AbstractAPIContents
+final class Info extends AbstractAPIContents implements APIContentsInterface
 {
     use \Magnolia\Traits\Redis;
 
-    public function getBody()
+    public function getBody(): array
     {
 
         $parameters = $this->getRedis()->hGetAll(RedisKeys::ENV_INFO);
 
         $data = [
-            'temperature'       => (float) $parameters[KindEnv::KIND_TEMPERATURE],
-            'humidity'          => (float) $parameters[KindEnv::KIND_HUMIDITY],
-            'pressure'          => (float) $parameters[KindEnv::KIND_PRESSURE],
-            'cpu_temperature'   => (float) $parameters[KindEnv::KIND_CPU_TEMPERATURE],
+            'temperature'       => (float) ($parameters[KindEnv::KIND_TEMPERATURE] ?? 0),
+            'humidity'          => (float) ($parameters[KindEnv::KIND_HUMIDITY] ?? 0),
+            'pressure'          => (float) ($parameters[KindEnv::KIND_PRESSURE] ?? 0),
+            'cpu_temperature'   => (float) ($parameters[KindEnv::KIND_CPU_TEMPERATURE] ?? 0),
         ];
 
         // Adjustment values
@@ -35,6 +36,23 @@ final class Info extends AbstractAPIContents
                 $value = null;
             }
         }
-        return $data;
+        return [
+            'info' => $data,
+            'versions' => [
+                'device' => [
+                    'number' => '0.0.0',
+                    'code'   => 'Magnolia',
+                    'extra'  => 'Raspbian',
+                ],
+                'app' => [
+                    'number' => '0.0.0',
+                    'code'   => 'Magnolia',
+                ],
+                'live_streaming' => [
+                    'number' => '0.0.0',
+                    'code'   => 'Magnolia',
+                ],
+            ],
+        ];
     }
 }

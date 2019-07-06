@@ -1,7 +1,9 @@
 <?php
 namespace Magnolia\Client\API\Contents;
 
-final class User extends AbstractAPIContents
+use Magnolia\Contract\APIContentsInterface;
+
+final class User extends AbstractAPIContents implements APIContentsInterface
 {
 
 }

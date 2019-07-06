@@ -1,7 +1,9 @@
 <?php
 namespace Magnolia\Client\API\Contents;
 
-final class Favorite extends AbstractAPIContents
+use Magnolia\Contract\APIContentsInterface;
+
+final class Favorite extends AbstractAPIContents implements APIContentsInterface
 {
 
 }

@@ -5,23 +5,27 @@ require __DIR__ . '/vendor/autoload.php';
 $env = Dotenv\Dotenv::create(__DIR__);
 $env->load();
 
+define('ROOT_DIR', __DIR__);
+
 date_default_timezone_set(getenv('TIMEZONE'));
 
-try {
-    (new \Magnolia\Main())
-        ->register(\Magnolia\Server\StreamingPipeline::class)
-        ->register(\Magnolia\Server\Camera::class)
-        ->register(\Magnolia\Server\EnvInfo::class)
-        ->register(\Magnolia\Server\API\Api::class)
-        ->run();
-
-} catch (Exception $e) {
-    fwrite(
-        fopen('/dev/stderr', 'w'),
-        sprintf(
-            '%s: %s',
-            get_class($e),
-            $e->getMessage(),
-        )
+set_error_handler(function ($errno, string $errstr, string $errfile, int $errline, array $errcontext) {
+    printf("\e[35m$errstr\e[39m\n");
+    printf("\e[35m  Line: $errline\e[39m\n");
+    printf("\e[35m  File: $errfile\e[39m\n");
+    throw new ErrorException(
+        $errstr,
+        $errno,
+        1,
+        $errfile,
+        $errline
     );
-}
+});
+
+
+(new \Magnolia\Main())
+    ->register(\Magnolia\Server\StreamingPipeline::class)
+    ->register(\Magnolia\Server\Camera::class)
+    ->register(\Magnolia\Server\EnvInfo::class)
+    ->register(\Magnolia\Server\API\Api::class)
+    ->run();

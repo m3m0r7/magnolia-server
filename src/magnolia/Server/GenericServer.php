@@ -41,52 +41,56 @@ class GenericServer extends AbstractServer implements ServerInterface
              */
             $channel = $this->channels[static::class];
             $synchronizer = $this->synchronizers[$this->synchronizeKey] ?? null;
+            $this->logger->info('Listening started.');
             while (true) {
-                $this->logger->info('Listening started.');
-                while ($client = @stream_socket_accept($server)) {
-                    // Check channel connections.
-                    if ($channel->isFull()) {
-                        $this->logger->info(
-                            'Failed to connect because it is over MAX_CONNECTIONS.'
-                        );
+                try {
+                    while ($client = @stream_socket_accept($server, 0)) {
+                        // Check channel connections.
+                        if ($channel->isFull()) {
+                            $this->logger->info(
+                                'Failed to connect because it is over MAX_CONNECTIONS.'
+                            );
 
-                        // Force closing session.
-                        fclose($client);
-                        continue;
+                            // Force closing session.
+                            fclose($client);
+                            continue;
+                        }
+
+                        // In one case, Google Chrome send 2 connections (pre-flight and fetching document data).
+                        // So, It need asynchronously processing.
+                        go(function () use ($synchronizer, $client, $channel) {
+                            // Lock with synchronizer, the stream does not allowed to write at the same time.
+                            if ($synchronizer !== null) {
+                                $synchronizer->lock();
+                            }
+
+                            $clientStream = new Stream($client);
+                            $channel->push($clientStream);
+
+                            // unlock
+                            if ($synchronizer !== null) {
+                                $synchronizer->unlock();
+                            }
+
+                            $connections = $channel->length();
+                            $this->logger->info($channel->length() . ' connections currently.');
+
+                            // If $instantiationClientClassName is null, it means the server not having reacting event.
+                            if ($this->instantiationClientClassName !== null) {
+                                $instantiationClientClassName = $this->instantiationClientClassName;
+                                go([
+                                    new $instantiationClientClassName(
+                                        $clientStream,
+                                        $this->channels,
+                                        $this->synchronizers
+                                    ),
+                                    'start'
+                                ]);
+                            }
+                        });
                     }
-
-                    // In one case, Google Chrome send 2 connections (pre-flight and fetching document data).
-                    // So, It need asynchronously processing.
-                    go(function () use ($synchronizer, $client, $channel) {
-                        // Lock with synchronizer, the stream does not allowed to write at the same time.
-                        if ($synchronizer !== null) {
-                            $synchronizer->lock();
-                        }
-
-                        $clientStream = new Stream($client);
-                        $channel->push($clientStream);
-
-                        // unlock
-                        if ($synchronizer !== null) {
-                            $synchronizer->unlock();
-                        }
-
-                        $connections = $channel->length();
-                        $this->logger->info($channel->length() . ' connections currently.');
-
-                        // If $instantiationClientClassName is null, it means the server not having reacting event.
-                        if ($this->instantiationClientClassName !== null) {
-                            $instantiationClientClassName = $this->instantiationClientClassName;
-                            go([
-                                new $instantiationClientClassName(
-                                    $clientStream,
-                                    $this->channels,
-                                    $this->synchronizers
-                                ),
-                                'start'
-                            ]);
-                        }
-                    });
+                } catch (\ErrorException $e) {
+                    // Nothing to do.
                 }
             }
         }

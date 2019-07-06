@@ -1,9 +1,15 @@
 <?php
 namespace Magnolia\Traits;
 
+
+use Magnolia\Stream\Stream;
+
+/**
+ * @property-read Stream $client
+ */
 trait HeaderReadable
 {
-    protected $responseHeaders = [];
+    protected $requestHeaders = [];
 
     public function proceedHeaders(): bool
     {
@@ -24,8 +30,23 @@ trait HeaderReadable
                 return false;
             }
 
-            $this->responseHeaders[] = rtrim($line, "\n");
+            $this->requestHeaders[] = rtrim($line, "\n");
         }
+
+        $this->requestHeaders = $this->parseHeaders($this->requestHeaders);
         return true;
+    }
+
+    public function parseHeaders(array $headers)
+    {
+        $parsedHeaders = [];
+        foreach ($headers as $header) {
+            if (preg_match('/^(.*?):(.*)/', $header, $matches)) {
+                $parsedHeaders[trim(strtolower($matches[1]))] = trim($matches[2]);
+                continue;
+            }
+            $parsedHeaders[] = $header;
+        }
+        return $parsedHeaders;
     }
 }
