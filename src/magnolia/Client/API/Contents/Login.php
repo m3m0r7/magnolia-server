@@ -43,6 +43,7 @@ final class Login extends AbstractAPIContents implements APIContentsInterface
         unset($user['password']);
         $this->getSession()->write('user', $user);
 
+        parent::getResponseBody();
         return [];
 
     }

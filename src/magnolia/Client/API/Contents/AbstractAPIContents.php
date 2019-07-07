@@ -45,7 +45,8 @@ abstract class AbstractAPIContents implements APIContentsInterface
 
     public function getResponseBody(): array
     {
-        return [];
+        $this->getSession()->emit();
+        return $this->returnOK();
     }
 
     public function getResponseHeaders(): array

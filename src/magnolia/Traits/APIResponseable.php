@@ -38,4 +38,10 @@ trait APIResponseable
             'error' => $message,
         ];
     }
+
+    public function returnOK(array $data = []): array
+    {
+        $this->setStatus(200);
+        return $data + ['status' => 200];
+    }
 }

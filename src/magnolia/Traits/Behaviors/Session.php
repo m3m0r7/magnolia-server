@@ -33,16 +33,18 @@ class Session
             if (!empty($data)) {
                 $this->sessions = unserialize($data);
             }
+            rewind($this->handle);
+            ftruncate($this->handle, strlen($data));
             flock($this->handle, LOCK_UN);
         }
 
         return $this;
     }
 
-    public function __destruct()
+    public function emit()
     {
-        var_dump('call me?');
         if (flock($this->handle, LOCK_EX)) {
+            rewind($this->handle);
             fwrite(
                 $this->handle,
                 serialize($this->sessions)
@@ -57,7 +59,7 @@ class Session
         return $this;
     }
 
-    public function read($key): ?string
+    public function read($key)
     {
         return $this->sessions[$key] ?? null;
     }

@@ -36,6 +36,9 @@ final class Info extends AbstractAPIContents implements APIContentsInterface
                 $value = null;
             }
         }
+
+        parent::getResponseBody();
+
         return [
             'info' => $data,
             'versions' => [

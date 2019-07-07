@@ -11,7 +11,11 @@ trait CookieUsable
     public function enableCookie(): self
     {
         foreach (preg_split('/\s*;\s*/', $this->headers['cookie'] ?? '') as $cookie) {
-            [$key, $value] = preg_split('/\s*=\s*/', $cookie, 2);
+            $splitCookie = preg_split('/\s*=\s*/', $cookie, 2);
+            if (count($splitCookie) < 2) {
+                continue;
+            }
+            [ $key, $value ] = $splitCookie;
             $this->cookies[$key] = $value;
         }
         return $this;
