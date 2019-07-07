@@ -11,9 +11,13 @@ final class Info extends AbstractAPIContents implements APIContentsInterface
 
     public function getResponseBody(): array
     {
+        if (!$this->getSession()->has('user')) {
+            return $this->returnUnauthorized(
+                'You did not logged-in.'
+            );
+        }
 
         $parameters = $this->getRedis()->hGetAll(RedisKeys::ENV_INFO);
-
         $data = [
             'temperature'       => (float) ($parameters[KindEnv::KIND_TEMPERATURE] ?? 0),
             'humidity'          => (float) ($parameters[KindEnv::KIND_HUMIDITY] ?? 0),

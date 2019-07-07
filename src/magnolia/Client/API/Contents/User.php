@@ -9,7 +9,7 @@ final class User extends AbstractAPIContents implements APIContentsInterface
     {
         if (!$this->getSession()->has('user')) {
             return $this->returnUnauthorized(
-                'Does not logged-in.'
+                'You did not logged-in.'
             );
         }
 
