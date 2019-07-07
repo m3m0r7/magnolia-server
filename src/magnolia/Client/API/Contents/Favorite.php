@@ -15,21 +15,23 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
 
         parent::getResponseBody();
         return $this->returnOK([
-            '2019/12' => [
-                [
-                    'src' => '/img/iris.jpg',
-                ],
-                [
-                    'src' => '/img/iris.jpg',
-                ],
-                [
-                    'src' => '/img/iris.jpg',
-                ],
-                [
-                    'src' => '/img/iris.jpg',
-                ],
-                [
-                    'src' => '/img/iris.jpg',
+            'dates' => (object) [
+                '2019/12' => [
+                    [
+                        'src' => '/img/iris.jpg',
+                    ],
+                    [
+                        'src' => '/img/iris.jpg',
+                    ],
+                    [
+                        'src' => '/img/iris.jpg',
+                    ],
+                    [
+                        'src' => '/img/iris.jpg',
+                    ],
+                    [
+                        'src' => '/img/iris.jpg',
+                    ],
                 ],
             ]
         ]);

@@ -12,6 +12,10 @@ use Magnolia\Client\AbstractClient;
 
 final class Api extends AbstractClient implements ClientInterface
 {
+    private const ALLOWED_METHODS = [
+        'GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS',
+    ];
+
     use \Magnolia\Traits\Redis;
     use \Magnolia\Traits\ClientManageable;
     use \Magnolia\Traits\HeaderReadable;
@@ -37,6 +41,11 @@ final class Api extends AbstractClient implements ClientInterface
 
         [$method, $path] = $header;
 
+        if (!in_array($method, static::ALLOWED_METHODS, true)) {
+            $this->disconnect();
+            return;
+        }
+
         // API needs to allow pre-flight request.
         if ($method === 'OPTIONS') {
             $this->emit(
@@ -50,8 +59,15 @@ final class Api extends AbstractClient implements ClientInterface
             return;
         }
 
-        $classPath = $this->routingMap($path);
-        if ($classPath === null) {
+        $routingInfo = $this->routingMap($path);
+        if ($routingInfo === null) {
+            $this->disconnect();
+            return;
+        }
+
+        if (!in_array($method, $routingInfo['method'], true) &&
+            !in_array('*', $routingInfo['method'], true)
+        ) {
             $this->disconnect();
             return;
         }
@@ -59,6 +75,7 @@ final class Api extends AbstractClient implements ClientInterface
         /**
          * @var AbstractAPIContents $class
          */
+        $classPath = $routingInfo['resource'];
         $class = new $classPath($method, $path, $this->requestHeaders, $this->requestBody);
         $this->emit($class);
     }
@@ -66,10 +83,22 @@ final class Api extends AbstractClient implements ClientInterface
     private function routingMap($path)
     {
         return [
-            '/api/v1/login' => \Magnolia\Client\API\Contents\Login::class,
-            '/api/v1/user' => \Magnolia\Client\API\Contents\User::class,
-            '/api/v1/info' => \Magnolia\Client\API\Contents\Info::class,
-            '/api/v1/favorite' => \Magnolia\Client\API\Contents\favorite::class,
+            '/api/v1/login' => [
+                'method' => ['POST'],
+                'resource' => \Magnolia\Client\API\Contents\Login::class,
+            ],
+            '/api/v1/user' => [
+                'method' => ['GET'],
+                'resource' => \Magnolia\Client\API\Contents\User::class,
+            ],
+            '/api/v1/info' => [
+                'method' => ['GET'],
+                'resource' => \Magnolia\Client\API\Contents\Info::class,
+            ],
+            '/api/v1/favorite' => [
+                'method' => ['GET'],
+                'resource' => \Magnolia\Client\API\Contents\favorite::class,
+            ],
         ][$path] ?? null;
     }
 }

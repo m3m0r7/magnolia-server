@@ -51,7 +51,10 @@ abstract class AbstractAPIContents implements APIContentsInterface
 
     public function getResponseHeaders(): array
     {
-        return $this->buildCookies();
+        return [
+            'Access-Control-Allow-Origin' => $this->headers['origin'] ?? '*',
+            'Access-Control-Allow-Credentials' => 'true',
+        ] + $this->buildCookies();
     }
 
     public function __toString(): string

@@ -10,12 +10,6 @@ final class Login extends AbstractAPIContents implements APIContentsInterface
 {
     public function getResponseBody(): array
     {
-        if ($this->method !== 'POST') {
-            return $this->returnBadRequest(
-                'Does not allowed method.'
-            );
-        }
-
         try {
             $content = json_decode(
                 $this->content,
@@ -30,7 +24,7 @@ final class Login extends AbstractAPIContents implements APIContentsInterface
         }
 
         $user = $this->findUser(
-            $content['username'] ?? null,
+            $content['id'] ?? null,
             $content['password'] ?? null,
         );
 
@@ -44,7 +38,7 @@ final class Login extends AbstractAPIContents implements APIContentsInterface
         $this->getSession()->write('user', $user);
 
         parent::getResponseBody();
-        return [];
+        return $this->returnOK();
 
     }
 

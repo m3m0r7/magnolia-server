@@ -20,8 +20,7 @@ trait HTTPEmittable
         $this->client
             ->writeLine("HTTP/1.1 " . $this->stringifyStatus($apiContents->getStatus()))
             ->writeLine("Content-Type: application/json")
-            ->writeLine("Content-Length: " . strlen($body))
-            ->writeLine("Access-Control-Allow-Origin: *");
+            ->writeLine("Content-Length: " . strlen($body));
 
         foreach ($apiContents->getResponseHeaders() as $header => $value) {
             if (!is_array($value)) {
