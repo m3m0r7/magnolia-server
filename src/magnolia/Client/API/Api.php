@@ -2,6 +2,7 @@
 namespace Magnolia\Client\API;
 
 use Magnolia\Client\API\Contents\AbstractAPIContents;
+use Magnolia\Client\API\Contents\PreflightRequest;
 use Magnolia\Contract\ClientInterface;
 use Magnolia\Enum\KindEnv;
 use Magnolia\Enum\RedisKeys;
@@ -35,6 +36,19 @@ final class Api extends AbstractClient implements ClientInterface
         }
 
         [$method, $path] = $header;
+
+        // API needs to allow pre-flight request.
+        if ($method === 'OPTIONS') {
+            $this->emit(
+                new PreflightRequest(
+                    $method,
+                    $path,
+                    $this->requestHeaders,
+                    $this->requestBody
+                )
+            );
+            return;
+        }
 
         $classPath = $this->routingMap($path);
         if ($classPath === null) {
