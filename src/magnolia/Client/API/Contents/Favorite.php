@@ -38,7 +38,9 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
             $json = json_decode(file_get_contents($file), true);
 
             $path = dirname($file) . '/' . $json['time'] . '.' . $json['extension'];
-            $files[$targetedDate][$json['time']] = '/api/v1/image?id=' . $json['time'];
+            $files[$targetedDate][$json['time']] = [
+                'src' => '/api/v1/image?id=' . $json['time'],
+            ];
         }
 
         // sort items
