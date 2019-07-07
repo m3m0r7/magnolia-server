@@ -13,27 +13,46 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
             );
         }
 
+        $user = $this->getSession()->read('user');
+        $userId = $user['id'];
+        $directory = STORAGE_DIR . '/' . $userId;
+
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777);
+        }
+
+        $files = [];
+
+        foreach (glob($directory . '/*/*.meta.json') as $file) {
+            $targetedDate = basename(dirname($file));
+            if (!preg_match('/^(\d{4})(\d{2})$/', $targetedDate, $matches)) {
+                continue;
+            }
+            [, $year, $month] = $matches;
+
+            $targetedDate = $year . $month;
+
+            if (!isset($files[$targetedDate])) {
+                $files[$targetedDate] = [];
+            }
+            $json = json_decode(file_get_contents($file), true);
+
+            $path = dirname($file) . '/' . $json['time'] . '.' . $json['extension'];
+            $files[$targetedDate][$json['time']] = '/api/v1/image?id=' . $json['time'];
+        }
+
+        // sort items
+        foreach ($files as &$items) {
+            krsort($items);
+
+            $items = array_values($items);
+        }
+
+        krsort($files);
+
         parent::getResponseBody();
         return $this->returnOK([
-            'dates' => (object) [
-                '2019/12' => [
-                    [
-                        'src' => '/img/iris.jpg',
-                    ],
-                    [
-                        'src' => '/img/iris.jpg',
-                    ],
-                    [
-                        'src' => '/img/iris.jpg',
-                    ],
-                    [
-                        'src' => '/img/iris.jpg',
-                    ],
-                    [
-                        'src' => '/img/iris.jpg',
-                    ],
-                ],
-            ]
+            'dates' => (object) $files
         ]);
     }
 }

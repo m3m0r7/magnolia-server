@@ -46,6 +46,8 @@ final class Login extends AbstractAPIContents implements APIContentsInterface
     {
         static $userFile = null;
 
+        $password = hash('sha512', getenv('SALT_KEY') . $password);
+
         $path = ROOT_DIR . '/users.json';
         $user = [];
 
