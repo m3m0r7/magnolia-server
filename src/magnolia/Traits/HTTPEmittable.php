@@ -19,7 +19,7 @@ trait HTTPEmittable
         // Write headers section.
         $this->client
             ->writeLine("HTTP/1.1 " . $this->stringifyStatus($apiContents->getStatus()))
-            ->writeLine("Content-Type: application/json")
+            ->writeLine("Content-Type: " . $apiContents->getContentType())
             ->writeLine("Content-Length: " . strlen($body));
 
         foreach ($apiContents->getResponseHeaders() as $header => $value) {
@@ -54,6 +54,8 @@ trait HTTPEmittable
                 return '401 Unauthorized';
             case 403:
                 return '403 Forbidden';
+            case 404:
+                return '404 Not Found';
             case 500:
                 return '500 Internal Server Error';
         }

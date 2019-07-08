@@ -2,6 +2,7 @@
 namespace Magnolia\Client\API\Contents;
 
 use Magnolia\Contract\APIContentsInterface;
+use Magnolia\Operation\Middleware\Query;
 use Magnolia\Traits\APIResponseable;
 use Magnolia\Traits\CookieUsable;
 use Magnolia\Traits\SessionUsable;
@@ -14,14 +15,17 @@ abstract class AbstractAPIContents implements APIContentsInterface
 
     protected $method;
     protected $path;
+    protected $query;
     protected $headers;
     protected $content;
     protected $status = 200;
+    protected $contentType = 'application/json';
 
-    public function __construct(string $method, string $path, array $headers = [], ?string $content = null)
+    public function __construct(string $method, string $path, string $queryString, array $headers = [], ?string $content = null)
     {
         $this->method = strtoupper($method);
         $this->path = $path;
+        $this->query = new Query($queryString);
         $this->headers = $headers;
         $this->content = $content;
 
@@ -30,6 +34,11 @@ abstract class AbstractAPIContents implements APIContentsInterface
 
         // Enable session
         $this->getSession()->enable();
+    }
+
+    public function getQuery(): Query
+    {
+        return $this->query;
     }
 
     public function setStatus(int $status): APIContentsInterface
@@ -41,6 +50,23 @@ abstract class AbstractAPIContents implements APIContentsInterface
     public function getStatus(): int
     {
         return $this->status;
+    }
+
+    public function setContentType(string $contentType): APIContentsInterface
+    {
+        $this->contentType = $contentType;
+        return $this;
+    }
+
+    public function getContentType()
+    {
+        switch ($this->contentType) {
+            case 'jpg':
+                return 'image/jpeg';
+            case 'png':
+                return 'image/png';
+        }
+        return $this->contentType;
     }
 
     public function getResponseBody(): array
@@ -59,6 +85,13 @@ abstract class AbstractAPIContents implements APIContentsInterface
 
     public function __toString(): string
     {
-        return json_encode($this->getResponseBody());
+        $body = $this->getResponseBody();
+        [ $prefix ] = explode('/', $this->getContentType());
+
+        // For Image
+        if ($prefix === 'image') {
+            return stream_get_contents($body['body']) ?? '';
+        }
+        return json_encode($body);
     }
 }

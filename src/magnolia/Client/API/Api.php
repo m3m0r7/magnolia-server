@@ -2,6 +2,7 @@
 namespace Magnolia\Client\API;
 
 use Magnolia\Client\API\Contents\AbstractAPIContents;
+use Magnolia\Client\API\Contents\NotFound;
 use Magnolia\Client\API\Contents\PreflightRequest;
 use Magnolia\Contract\ClientInterface;
 use Magnolia\Enum\KindEnv;
@@ -39,7 +40,10 @@ final class Api extends AbstractClient implements ClientInterface
             return;
         }
 
-        [$method, $path] = $header;
+        [ $method, $path ] = $header;
+        $splitPath = explode('?', $path, 2);
+        $path = $splitPath[0] ?? null;
+        $queryString = $splitPath[1] ?? '';
 
         if (!in_array($method, static::ALLOWED_METHODS, true)) {
             $this->disconnect();
@@ -52,6 +56,7 @@ final class Api extends AbstractClient implements ClientInterface
                 new PreflightRequest(
                     $method,
                     $path,
+                    $queryString,
                     $this->requestHeaders,
                     $this->requestBody
                 )
@@ -60,15 +65,22 @@ final class Api extends AbstractClient implements ClientInterface
         }
 
         $routingInfo = $this->routingMap($path);
-        if ($routingInfo === null) {
-            $this->disconnect();
-            return;
-        }
 
-        if (!in_array($method, $routingInfo['method'], true) &&
-            !in_array('*', $routingInfo['method'], true)
+        if ($routingInfo === null ||
+            (
+                !in_array($method, $routingInfo['method'], true) &&
+                !in_array('*', $routingInfo['method'], true)
+            )
         ) {
-            $this->disconnect();
+            $this->emit(
+                new NotFound(
+                    $method,
+                    $path,
+                    $queryString,
+                    $this->requestHeaders,
+                    $this->requestBody
+                )
+            );
             return;
         }
 
@@ -76,7 +88,13 @@ final class Api extends AbstractClient implements ClientInterface
          * @var AbstractAPIContents $class
          */
         $classPath = $routingInfo['resource'];
-        $class = new $classPath($method, $path, $this->requestHeaders, $this->requestBody);
+        $class = new $classPath(
+            $method,
+            $path,
+            $queryString,
+            $this->requestHeaders,
+            $this->requestBody
+        );
         $this->emit($class);
     }
 
@@ -98,6 +116,10 @@ final class Api extends AbstractClient implements ClientInterface
             '/api/v1/favorite' => [
                 'method' => ['GET'],
                 'resource' => \Magnolia\Client\API\Contents\favorite::class,
+            ],
+            '/api/v1/image' => [
+                'method' => ['GET'],
+                'resource' => \Magnolia\Client\API\Contents\Image::class,
             ],
         ][$path] ?? null;
     }

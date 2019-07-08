@@ -39,6 +39,15 @@ trait APIResponseable
         ];
     }
 
+    public function returnNotFound(string $message = null): array
+    {
+        $this->setStatus(404);
+        return [
+            'status' => 404,
+            'error' => $message,
+        ];
+    }
+
     public function returnOK(array $data = []): array
     {
         $this->setStatus(200);
