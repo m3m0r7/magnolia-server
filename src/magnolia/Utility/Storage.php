@@ -22,6 +22,7 @@ final class Storage
             fwrite($handle, $content);
             flock($handle, LOCK_UN);
         }
+        fclose($handle);
 
         $handle = fopen($path . '.meta.json', 'w+');
         if (flock($handle, LOCK_EX)) {
