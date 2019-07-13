@@ -11,9 +11,6 @@ define('STORAGE_DIR', ROOT_DIR . '/storage');
 date_default_timezone_set(getenv('TIMEZONE'));
 
 set_error_handler(function ($errno, string $errstr, string $errfile, int $errline, array $errcontext) {
-    printf("\e[35m$errstr\e[39m\n");
-    printf("\e[35m  Line: $errline\e[39m\n");
-    printf("\e[35m  File: $errfile\e[39m\n");
     throw new ErrorException(
         $errstr,
         $errno,
@@ -23,10 +20,21 @@ set_error_handler(function ($errno, string $errstr, string $errfile, int $errlin
     );
 });
 
+try {
+    (new \Magnolia\Main())
+        ->register(\Magnolia\Server\StreamingPipeline::class)
+        ->register(\Magnolia\Server\Camera::class)
+        ->register(\Magnolia\Server\EnvInfo::class)
+        ->register(\Magnolia\Server\API\Api::class)
+        ->run();
 
-(new \Magnolia\Main())
-    ->register(\Magnolia\Server\StreamingPipeline::class)
-    ->register(\Magnolia\Server\Camera::class)
-    ->register(\Magnolia\Server\EnvInfo::class)
-    ->register(\Magnolia\Server\API\Api::class)
-    ->run();
+} catch (ErrorException | Error $e) {
+    // Caught Fatal error
+    $errstr = $e->getMessage();
+    $errline = $e->getLine();
+    $errfile = $e->getFile();
+
+    printf("\e[35m$errstr\e[39m\n");
+    printf("\e[35m  Line: $errline\e[39m\n");
+    printf("\e[35m  File: $errfile\e[39m\n");
+}

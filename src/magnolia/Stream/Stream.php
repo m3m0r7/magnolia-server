@@ -89,7 +89,7 @@ class Stream
 
     public function isDisconnected(): bool
     {
-        return false;
+        return feof($this->stream);
     }
 
     public function getUUID(): string
