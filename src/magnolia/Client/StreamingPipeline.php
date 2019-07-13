@@ -42,6 +42,22 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
             ->writeLine("")
             ->emit();
 
+        $image = imagecreatetruecolor(640, 480);
+        imagefill($image, 0, 0, imagecolorallocate($image, 0, 0, 0));
+        ob_start();
+        imagejpeg($image);
+        $image = ob_get_clean();
+
+        $this->client
+            ->enableBuffer(false)
+            ->write(
+                WebSocket::encodeMessage(
+                    $this->client,
+                    base64_encode($image),
+
+                )
+            );
+
         // Processing Websocket
         while (true) {
             $this->logger->info('WebSocket Receiving Server is started.');
@@ -52,12 +68,22 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
                 if ($this->client->isDisconnected()) {
                     continue;
                 }
-                if ($changes > 0) {
+                if (!empty($writeClients)) {
+                    // Wrote from a client.
                     try {
                         [ $opcode, $message ] = WebSocket::decodeMessage($this->client);
 
                         switch ($opcode) {
                             case WebSocket::OPCODE_CLOSE:
+                                $this->client
+                                    ->enableBuffer(false)
+                                    ->write(
+                                        WebSocket::encodeMessage(
+                                            $this->client,
+                                            '',
+                                            WebSocket::OPCODE_CLOSE
+                                        )
+                                    );
                                 $this->disconnect();
                                 break;
                             case WebSocket::OPCODE_PING:
@@ -67,8 +93,7 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
                                         WebSocket::encodeMessage(
                                             $this->client,
                                             $message
-                                        ),
-
+                                        )
                                     );
                                 break;
                         }

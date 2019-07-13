@@ -85,7 +85,7 @@ final class WebSocket
 
         $body .= chr(
             // Mask (Not use) + payload length
-            $length
+            $type
         );
 
         if ($type === 126) {
@@ -95,6 +95,7 @@ final class WebSocket
         }
 
         $body .= $payload;
+
 
         return $body;
     }
