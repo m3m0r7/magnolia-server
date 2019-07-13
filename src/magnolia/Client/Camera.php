@@ -5,11 +5,14 @@ use Magnolia\Contract\ClientInterface;
 use Magnolia\Enum\SynchronizerKeys;
 use Magnolia\Stream\Stream;
 use Magnolia\Synchronization\Synchronizer;
+use Magnolia\Utility\Storage;
+use Magnolia\Utility\WebSocket;
 use Monolog\Logger;
 use Swoole\Coroutine\Channel;
 
 final class Camera extends AbstractClient implements ClientInterface
 {
+    const UPDATE_IMAGE_INTERVAL = 30;
     use \Magnolia\Traits\ClientManageable;
 
     protected $loggerChannelName = 'Camera.Client';
@@ -26,6 +29,7 @@ final class Camera extends AbstractClient implements ClientInterface
         $synchronizer = $this->synchronizers[SynchronizerKeys::CLIENT_FROM_STREAMING_PIPELINE];
 
         while (true) {
+            $nextUpdateImage = 0;
             while ($sizePacket = $this->client->read(4)) {
                 $size = current(unpack('L', $sizePacket));
                 if ($size === 0) {
@@ -41,6 +45,19 @@ final class Camera extends AbstractClient implements ClientInterface
                 if ($channel->isEmpty()) {
                     continue;
                 }
+
+                if ($nextUpdateImage < time()) {
+                    $nextUpdateImage = time() + static::UPDATE_IMAGE_INTERVAL;
+                    Storage::put(
+                        '/record/image.jpg',
+                        $packet,
+                        [
+                            'updated_at' => $nextUpdateImage - static::UPDATE_IMAGE_INTERVAL,
+                            'next_update' => $nextUpdateImage,
+                        ]
+                    );
+                }
+
                 go(function () use ($packet, $channel, $synchronizer) {
 
                     $synchronizer->lock();
@@ -56,11 +73,13 @@ final class Camera extends AbstractClient implements ClientInterface
 
                         // send packets
                         $client
-                            ->writeLine('--' . $client->getUUID())
-                            ->writeLine('Content-Type: image/jpeg')
-                            ->writeLine('Content-Length: ' . strlen($packet))
-                            ->writeLine('')
-                            ->writeLine($packet);
+                            ->enableBuffer(false)
+                            ->write(
+                                WebSocket::encodeMessage(
+                                    $client,
+                                    'data:image/jpeg;base64,' . base64_encode($packet)
+                                )
+                            );
 
                         $tempClientConnections[] = $client;
                     }

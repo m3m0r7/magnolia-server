@@ -42,6 +42,7 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
             ->writeLine("")
             ->emit();
 
+        // In first, send to client which is a fulfilled black screen.
         $image = imagecreatetruecolor(640, 480);
         imagefill($image, 0, 0, imagecolorallocate($image, 0, 0, 0));
         ob_start();
@@ -53,8 +54,7 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
             ->write(
                 WebSocket::encodeMessage(
                     $this->client,
-                    base64_encode($image),
-
+                    'data:image/jpeg;base64,' . base64_encode($image),
                 )
             );
 
@@ -66,7 +66,8 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
             $expectClients = [];
             while ($changes = stream_select($readClients, $writeClients, $expectClients, 200000)) {
                 if ($this->client->isDisconnected()) {
-                    continue;
+                    // Finish the coroutine processing if the client is disconnected.
+                    return;
                 }
                 if (!empty($writeClients)) {
                     // Wrote from a client.
@@ -85,8 +86,11 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
                                         )
                                     );
                                 $this->disconnect();
-                                break;
+
+                                // Finish the coroutine processing if the client is disconnected.
+                                return;
                             case WebSocket::OPCODE_PING:
+                                // If receive ping packet, then return pong packet.
                                 $this->client
                                     ->enableBuffer(false)
                                     ->write(

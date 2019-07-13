@@ -96,7 +96,6 @@ final class WebSocket
 
         $body .= $payload;
 
-
         return $body;
     }
 

@@ -45,7 +45,10 @@ final class Synchronizer
 
     public function wait(int $timeout = 0): void
     {
-        while($this->isLocked());
+        while($this->isLocked()) {
+            // This is CPU Usage controlling.
+            usleep(1);
+        }
     }
 
     public function synchronize(callable $callback, int $timeout = 0): self

@@ -2,9 +2,11 @@
 namespace Magnolia\Client\API\Contents;
 
 use Magnolia\Contract\APIContentsInterface;
+use Magnolia\Exception\FileNotFoundException;
 use Magnolia\Traits\APIResponseable;
 use Magnolia\Traits\CookieUsable;
 use Magnolia\Traits\SessionUsable;
+use Magnolia\Utility\Storage;
 
 final class Image extends AbstractAPIContents implements APIContentsInterface
 {
@@ -20,21 +22,17 @@ final class Image extends AbstractAPIContents implements APIContentsInterface
 
         $user = $this->getSession()->read('user');
         $userId = $user['id'];
-        $path = STORAGE_DIR . '/' . $userId . '/' . $date;
-        $meta = $path . '/' . $id . '.meta.json';
 
-        if (!is_file($meta)) {
+        $data = '';
+        $metaData = [];
+        try {
+            [ $data, $metaData ] = Storage::get("/{$userId}/{$date}");
+            $this->setContentType($metaData['extension']);
+        } catch (FileNotFoundException $e) {
             return $this->returnNotFound(
                 'Image not found.'
             );
         }
-
-        $metaData = json_decode(
-            file_get_contents($meta),
-            true
-        );
-
-        $this->setContentType($metaData['extension']);
 
         return [
             'body' => fopen($path . '/' . $metaData['time'] . '.' . $metaData['extension'], 'r'),
