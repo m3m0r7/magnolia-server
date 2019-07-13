@@ -64,7 +64,8 @@ class GenericServer extends AbstractServer implements ServerInterface
                                 $synchronizer->lock();
                             }
 
-                            $clientStream = new Stream($client);
+                            $streamClass = $this->clientStreamClass;
+                            $clientStream = new $streamClass($client);
                             $channel->push($clientStream);
 
                             // unlock

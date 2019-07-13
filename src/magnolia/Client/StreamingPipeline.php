@@ -6,6 +6,7 @@ use Magnolia\Enum\KindEnv;
 use Magnolia\Enum\RedisKeys;
 use Magnolia\Exception\WebSocketServerException;
 use Magnolia\Stream\Stream;
+use Magnolia\Stream\WebSocketStream;
 use Magnolia\Utility\Functions;
 use Magnolia\Utility\WebSocket;
 use Monolog\Logger;
@@ -16,6 +17,11 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
 
     use \Magnolia\Traits\ClientManageable;
     use \Magnolia\Traits\HeaderReadable;
+
+    /**
+     * @var WebSocketStream $client
+     */
+    protected $client;
 
     protected $loggerChannelName = 'StreamingPipeline.Client';
 
@@ -49,6 +55,7 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
         imagejpeg($image);
         $image = ob_get_clean();
 
+        $this->client->setEstablishedHandshake(true);
         $this->client
             ->enableBuffer(false)
             ->write(

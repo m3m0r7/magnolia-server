@@ -2,6 +2,7 @@
 namespace Magnolia\Server;
 
 use Magnolia\Contract\ServerInterface;
+use Magnolia\Stream\Stream;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Magnolia\Utility\Functions;
@@ -15,6 +16,7 @@ abstract class AbstractServer implements ServerInterface
     protected $instantiationClientClassName = null;
     protected $synchronizers = [];
     protected $synchronizeKey = null;
+    protected $clientStreamClass = Stream::class;
 
     public function __construct(array &$channels = [], array &$synchronizers = [])
     {

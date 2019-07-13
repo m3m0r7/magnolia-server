@@ -4,6 +4,7 @@ namespace Magnolia\Client;
 use Magnolia\Contract\ClientInterface;
 use Magnolia\Enum\SynchronizerKeys;
 use Magnolia\Stream\Stream;
+use Magnolia\Stream\WebSocketStream;
 use Magnolia\Synchronization\Synchronizer;
 use Magnolia\Utility\Storage;
 use Magnolia\Utility\WebSocket;
@@ -64,10 +65,14 @@ final class Camera extends AbstractClient implements ClientInterface
                     $tempClientConnections = [];
                     while (!$channel->isEmpty()) {
                         /**
-                         * @var Stream $client
+                         * @var WebSocketStream $client
                          */
                         $client = $channel->pop();
                         if ($client->isDisconnected()) {
+                            continue;
+                        }
+
+                        if (!$client->isEstablishedHandshake()) {
                             continue;
                         }
 
