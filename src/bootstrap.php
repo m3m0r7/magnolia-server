@@ -10,16 +10,6 @@ define('STORAGE_DIR', ROOT_DIR . '/storage');
 
 date_default_timezone_set(getenv('TIMEZONE'));
 
-set_error_handler(function ($errno, string $errstr, string $errfile, int $errline, array $errcontext) {
-    throw new ErrorException(
-        $errstr,
-        $errno,
-        1,
-        $errfile,
-        $errline
-    );
-});
-
 try {
     (new \Magnolia\Main())
         ->register(\Magnolia\Server\StreamingPipeline::class)
@@ -28,7 +18,7 @@ try {
         ->register(\Magnolia\Server\API\Api::class)
         ->run();
 
-} catch (ErrorException | Error $e) {
+} catch (\Exception | Error $e) {
     // Caught Fatal error
     $errstr = $e->getMessage();
     $errline = $e->getLine();

@@ -103,14 +103,14 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
                                     ->write(
                                         WebSocket::encodeMessage(
                                             $this->client,
-                                            $message
+                                            $message,
+                                            WebSocket::OPCODE_PONG
                                         )
                                     );
                                 break;
                         }
 
                     } catch (WebSocketServerException $e) {
-
                     }
                 }
             }

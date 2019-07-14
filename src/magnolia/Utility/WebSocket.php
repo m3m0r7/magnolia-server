@@ -3,6 +3,7 @@ namespace Magnolia\Utility;
 
 use Magnolia\Exception\WebSocketServerException;
 use Magnolia\Stream\Stream;
+use Magnolia\Stream\WebSocketStream;
 
 final class WebSocket
 {
@@ -13,7 +14,7 @@ final class WebSocket
     const OPCODE_PING = 0x09;
     const OPCODE_PONG = 0x0A;
 
-    public static function decodeMessage(Stream $client): array
+    public static function decodeMessage(WebSocketStream $client): array
     {
         $byte = ord($client->read(1));
 
@@ -64,13 +65,15 @@ final class WebSocket
         return [
             $opcode,
             static::mask(
-                $client->read($length),
+                $length > 0
+                    ? $client->read($length)
+                    : '',
                 $masks
             ),
         ];
     }
 
-    public static function encodeMessage(Stream $client, string $payload, int $opcode = self::OPCODE_MESSAGE): string
+    public static function encodeMessage(WebSocketStream $client, string $payload, int $opcode = self::OPCODE_MESSAGE): string
     {
         $length = strlen($payload);
         $type = ($length > 0xffff ? 127 : ($length <= 0xffff && $length >= 126 ? 126 : $length));
