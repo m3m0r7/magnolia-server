@@ -17,11 +17,13 @@ abstract class AbstractServer implements ServerInterface
     protected $synchronizers = [];
     protected $synchronizeKey = null;
     protected $clientStreamClass = Stream::class;
+    protected $procedures = [];
 
-    public function __construct(array &$channels = [], array &$synchronizers = [])
+    public function __construct(array &$channels = [], array &$synchronizers = [], array &$procedures = [])
     {
         $this->channels = $channels;
         $this->synchronizers = $synchronizers;
+        $this->procedures = $procedures;
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,
             $this->loggerLevel,

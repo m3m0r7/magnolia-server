@@ -13,7 +13,12 @@ final class Storage
         return STORAGE_DIR . '/' . ltrim($path, '/');
     }
 
-    public static function put(string $path, string $content, array $meta): void
+    public static function copy(string $from, string $to)
+    {
+
+    }
+
+    public static function put(string $path, string $content, array $meta = []): void
     {
         $path = static::getPath($path);
         $dirname = dirname($path);

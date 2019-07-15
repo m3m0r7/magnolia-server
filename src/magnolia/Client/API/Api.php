@@ -54,6 +54,7 @@ final class Api extends AbstractClient implements ClientInterface
         if ($method === 'OPTIONS') {
             $this->emit(
                 new PreflightRequest(
+                    $this,
                     $method,
                     $path,
                     $queryString,
@@ -74,6 +75,7 @@ final class Api extends AbstractClient implements ClientInterface
         ) {
             $this->emit(
                 new NotFound(
+                    $this,
                     $method,
                     $path,
                     $queryString,
@@ -89,6 +91,7 @@ final class Api extends AbstractClient implements ClientInterface
          */
         $classPath = $routingInfo['resource'];
         $class = new $classPath(
+            $this,
             $method,
             $path,
             $queryString,
@@ -114,8 +117,8 @@ final class Api extends AbstractClient implements ClientInterface
                 'resource' => \Magnolia\Client\API\Contents\Info::class,
             ],
             '/api/v1/favorite' => [
-                'method' => ['GET'],
-                'resource' => \Magnolia\Client\API\Contents\favorite::class,
+                'method' => ['GET', 'POST'],
+                'resource' => \Magnolia\Client\API\Contents\Favorite::class,
             ],
             '/api/v1/image' => [
                 'method' => ['GET'],

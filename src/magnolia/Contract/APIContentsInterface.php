@@ -3,7 +3,14 @@ namespace Magnolia\Contract;
 
 interface APIContentsInterface
 {
-    public function __construct(string $method, string $path, string $queryString, array $headers = [], ?string $body = null);
+    public function __construct(
+        ClientInterface $client,
+        string $method,
+        string $path,
+        string $queryString,
+        array $headers = [],
+        ?string $content = null
+    );
 
     public function getResponseBody(): array;
 

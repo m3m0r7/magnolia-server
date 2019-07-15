@@ -2,6 +2,7 @@
 namespace Magnolia\Client\API\Contents;
 
 use Magnolia\Contract\APIContentsInterface;
+use Magnolia\Contract\ClientInterface;
 use Magnolia\Operation\Middleware\Query;
 use Magnolia\Traits\APIResponseable;
 use Magnolia\Traits\CookieUsable;
@@ -13,6 +14,10 @@ abstract class AbstractAPIContents implements APIContentsInterface
     use CookieUsable;
     use SessionUsable;
 
+    /**
+     * @var ClientInterface $client
+     */
+    protected $client;
     protected $method;
     protected $path;
     protected $query;
@@ -21,8 +26,15 @@ abstract class AbstractAPIContents implements APIContentsInterface
     protected $status = 200;
     protected $contentType = 'application/json';
 
-    public function __construct(string $method, string $path, string $queryString, array $headers = [], ?string $content = null)
-    {
+    public function __construct(
+        ClientInterface $client,
+        string $method,
+        string $path,
+        string $queryString,
+        array $headers = [],
+        ?string $content = null
+    ) {
+        $this->client = $client;
         $this->method = strtoupper($method);
         $this->path = $path;
         $this->query = new Query($queryString);

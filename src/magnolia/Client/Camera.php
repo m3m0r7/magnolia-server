@@ -2,6 +2,7 @@
 namespace Magnolia\Client;
 
 use Magnolia\Contract\ClientInterface;
+use Magnolia\Enum\ProcedureKeys;
 use Magnolia\Enum\Runtime;
 use Magnolia\Enum\SynchronizerKeys;
 use Magnolia\Stream\Stream;
@@ -15,6 +16,7 @@ use Swoole\Coroutine\Channel;
 final class Camera extends AbstractClient implements ClientInterface
 {
     use \Magnolia\Traits\ClientManageable;
+    use \Magnolia\Traits\ProcedureManageable;
 
     protected $loggerChannelName = 'Camera.Client';
     protected $loggerLevel = Logger::DEBUG;
@@ -60,7 +62,10 @@ final class Camera extends AbstractClient implements ClientInterface
                 }
 
                 go(function () use ($packet, $channel, $synchronizer) {
-
+                    $this->proceedProcedure(
+                        ProcedureKeys::CAPTURE_FAVORITE,
+                        $packet
+                    );
                     $synchronizer->lock();
                     $tempClientConnections = [];
                     while (!$channel->isEmpty()) {

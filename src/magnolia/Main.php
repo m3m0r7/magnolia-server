@@ -21,9 +21,13 @@ final class Main
     {
         // create channels
         $channels = [];
+        $procedures = [];
         foreach ($this->events as $eventClass) {
             $channels[$eventClass] = new \Swoole\Coroutine\Channel(
                 (int) getenv('MAX_CONNECTIONS')
+            );
+            $procedures[$eventClass] = new \Swoole\Coroutine\Channel(
+                (int) getenv('MAX_PROCEDURE_STACKS')
             );
         }
 
@@ -38,7 +42,7 @@ final class Main
             /**
              * @var \Magnolia\Contract\ServerInterface $event
              */
-            $event = new $eventClass($channels, $synchronizers);
+            $event = new $eventClass($channels, $synchronizers, $procedures);
             if ($event instanceof TimerInterface) {
                 // if event type is a timer, then run with Swoole\Timer.
                 $channels[$eventClass]->push(

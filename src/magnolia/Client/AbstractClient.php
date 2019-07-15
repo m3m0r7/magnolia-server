@@ -15,17 +15,23 @@ abstract class AbstractClient implements ClientInterface
     protected $data = [];
     protected $channels = [];
     protected $synchronizers = [];
+    protected $procedures = [];
 
     /**
      * @var Stream $client
      */
     protected $client;
 
-    public function __construct(Stream $client, array &$channels = [], array &$synchronizers = [])
-    {
+    public function __construct(
+        Stream $client,
+        array &$channels = [],
+        array &$synchronizers = [],
+        array &$procedures = []
+    ) {
         $this->client = $client;
         $this->channels = $channels;
         $this->synchronizers = $synchronizers;
+        $this->procedures = $procedures;
         $this->logger = Functions::getLogger(
             $this->loggerChannelName,
             $this->loggerLevel,
@@ -35,6 +41,11 @@ abstract class AbstractClient implements ClientInterface
             'Connected client',
             [$this->client->getPeer()]
         );
+    }
+
+    public function getProcedures(): array
+    {
+        return $this->procedures;
     }
 
     abstract public function start(): void;
