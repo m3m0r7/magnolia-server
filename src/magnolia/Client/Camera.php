@@ -41,12 +41,6 @@ final class Camera extends AbstractClient implements ClientInterface
 
                 $packet = $this->client->read($size);
 
-                // if channel is empty, don't proceed to send image packet to client.
-                // otherwise, send image packet to client in a coroutine.
-                if ($channel->isEmpty()) {
-                    continue;
-                }
-
                 if ($nextUpdateImage < time()) {
                     $nextUpdateImage = time() + Runtime::UPDATE_IMAGE_INTERVAL;
                     Storage::put(
@@ -57,6 +51,12 @@ final class Camera extends AbstractClient implements ClientInterface
                             'next_update' => $nextUpdateImage,
                         ]
                     );
+                }
+
+                // if channel is empty, don't proceed to send image packet to client.
+                // otherwise, send image packet to client in a coroutine.
+                if ($channel->isEmpty()) {
+                    continue;
                 }
 
                 go(function () use ($packet, $channel, $synchronizer) {

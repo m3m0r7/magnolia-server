@@ -30,6 +30,7 @@ final class Capture extends AbstractAPIContents implements APIContentsInterface
         return $this->returnOK([
             'image' => 'data:image/jpeg;base64,' . base64_encode($data),
             'updated_at' => $metaData['updated_at'] ?? null,
+            'update_interval' => Runtime::UPDATE_IMAGE_INTERVAL,
             'next_update' => $metaData['next_update'] ?? (time() + Runtime::UPDATE_IMAGE_INTERVAL),
         ]);
     }
