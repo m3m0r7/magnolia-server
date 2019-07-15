@@ -121,6 +121,10 @@ final class Api extends AbstractClient implements ClientInterface
                 'method' => ['GET'],
                 'resource' => \Magnolia\Client\API\Contents\Image::class,
             ],
+            '/api/v1/capture' => [
+                'method' => ['GET'],
+                'resource' => \Magnolia\Client\API\Contents\Capture::class,
+            ],
         ][$path] ?? null;
     }
 }

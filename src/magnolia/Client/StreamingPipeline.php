@@ -17,6 +17,7 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
 
     use \Magnolia\Traits\ClientManageable;
     use \Magnolia\Traits\HeaderReadable;
+    use \Magnolia\Traits\ImageRenderable;
 
     /**
      * @var WebSocketStream $client
@@ -49,11 +50,7 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
             ->emit();
 
         // In first, send to client which is a fulfilled black screen.
-        $image = imagecreatetruecolor(640, 480);
-        imagefill($image, 0, 0, imagecolorallocate($image, 0, 0, 0));
-        ob_start();
-        imagejpeg($image);
-        $image = ob_get_clean();
+        $image = $this->renderBlackScreen();
 
         $this->client->setEstablishedHandshake(true);
         $this->client

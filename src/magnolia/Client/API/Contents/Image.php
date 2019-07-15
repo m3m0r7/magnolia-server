@@ -22,20 +22,21 @@ final class Image extends AbstractAPIContents implements APIContentsInterface
 
         $user = $this->getSession()->read('user');
         $userId = $user['id'];
+        $file = "/{$userId}/{$date}.jpg";
 
-        $data = '';
-        $metaData = [];
-        try {
-            [ $data, $metaData ] = Storage::get("/{$userId}/{$date}");
-            $this->setContentType($metaData['extension']);
-        } catch (FileNotFoundException $e) {
+        if (
+            $id !== $userId ||
+            !is_file(Storage::getPath($file))
+        ) {
             return $this->returnNotFound(
                 'Image not found.'
             );
         }
 
+        $this->setContentType('jpg');
+
         return [
-            'body' => fopen($path . '/' . $metaData['time'] . '.' . $metaData['extension'], 'r'),
+            'body' => fopen(Storage::getPath($file), 'r'),
         ];
     }
 }

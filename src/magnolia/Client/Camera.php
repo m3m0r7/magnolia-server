@@ -2,6 +2,7 @@
 namespace Magnolia\Client;
 
 use Magnolia\Contract\ClientInterface;
+use Magnolia\Enum\Runtime;
 use Magnolia\Enum\SynchronizerKeys;
 use Magnolia\Stream\Stream;
 use Magnolia\Stream\WebSocketStream;
@@ -13,7 +14,6 @@ use Swoole\Coroutine\Channel;
 
 final class Camera extends AbstractClient implements ClientInterface
 {
-    const UPDATE_IMAGE_INTERVAL = 30;
     use \Magnolia\Traits\ClientManageable;
 
     protected $loggerChannelName = 'Camera.Client';
@@ -48,12 +48,12 @@ final class Camera extends AbstractClient implements ClientInterface
                 }
 
                 if ($nextUpdateImage < time()) {
-                    $nextUpdateImage = time() + static::UPDATE_IMAGE_INTERVAL;
+                    $nextUpdateImage = time() + Runtime::UPDATE_IMAGE_INTERVAL;
                     Storage::put(
                         '/record/image.jpg',
                         $packet,
                         [
-                            'updated_at' => $nextUpdateImage - static::UPDATE_IMAGE_INTERVAL,
+                            'updated_at' => $nextUpdateImage - Runtime::UPDATE_IMAGE_INTERVAL,
                             'next_update' => $nextUpdateImage,
                         ]
                     );
