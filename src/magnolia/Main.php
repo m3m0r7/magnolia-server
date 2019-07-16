@@ -23,10 +23,16 @@ final class Main
         $channels = [];
         $procedures = [];
         foreach ($this->events as $eventClass) {
+            /**
+             * @var string $eventClass
+             */
             $channels[$eventClass] = new \Swoole\Coroutine\Channel(
                 (int) getenv('MAX_CONNECTIONS')
             );
             $procedures[$eventClass] = new \Swoole\Coroutine\Channel(
+                (int) getenv('MAX_PROCEDURE_STACKS')
+            );
+            $procedures[$eventClass::getInstantiationClientClassName()] = new \Swoole\Coroutine\Channel(
                 (int) getenv('MAX_PROCEDURE_STACKS')
             );
         }

@@ -9,7 +9,7 @@ use Magnolia\Server\GenericServer;
 final class Api extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'API.Server';
-    protected $instantiationClientClassName = \Magnolia\Client\API\Api::class;
+    protected static $instantiationClientClassName = \Magnolia\Client\API\Api::class;
 
     public function getServerName(): string
     {

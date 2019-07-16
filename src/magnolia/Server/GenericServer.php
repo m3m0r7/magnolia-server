@@ -77,13 +77,14 @@ class GenericServer extends AbstractServer implements ServerInterface
                             $this->logger->info($channel->length() . ' connections currently.');
 
                             // If $instantiationClientClassName is null, it means the server not having reacting event.
-                            if ($this->instantiationClientClassName !== null) {
-                                $instantiationClientClassName = $this->instantiationClientClassName;
+                            if (static::$instantiationClientClassName !== null) {
+                                $instantiationClientClassName = static::$instantiationClientClassName;
                                 go([
                                     new $instantiationClientClassName(
                                         $clientStream,
                                         $this->channels,
-                                        $this->synchronizers
+                                        $this->synchronizers,
+                                        $this->procedures
                                     ),
                                     'start'
                                 ]);

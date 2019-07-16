@@ -3,10 +3,12 @@ namespace Magnolia\Traits;
 
 use Magnolia\Contract\ClientInterface;
 use Magnolia\Stream\Stream;
+use Monolog\Logger;
 use Swoole\Coroutine\Channel;
 
 /**
  * @property-read ClientInterface|Stream $client
+ * @property-read Logger $logger
  */
 trait ProcedureManageable
 {
@@ -15,11 +17,14 @@ trait ProcedureManageable
         int $key,
         callable $callback,
         ...$parameters
-    ) {
+    ): void {
         /**
          * @var Channel $procedure
          */
-        $procedure = $this->client->getProcedures()[$procedureTargetClass];
+        $procedure = $this->client->getProcedures()[$procedureTargetClass] ?? null;
+        if ($procedure === null) {
+            return;
+        }
         $procedure->push([
             $callback,
             $key,
@@ -44,6 +49,9 @@ trait ProcedureManageable
                 $restoreProcedures[] = $procedure->pop();
                 continue;
             }
+            $this->logger->debug(
+                'Fired procedure (KeyId: ' . $targetKey . ')'
+            );
             $callback(
                 $procedure,
                 ...$parameters,

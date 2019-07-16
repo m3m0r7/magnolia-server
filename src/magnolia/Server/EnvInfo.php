@@ -8,7 +8,7 @@ use Monolog\Logger;
 final class EnvInfo extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'EnvInfo.Server';
-    protected $instantiationClientClassName = \Magnolia\Client\EnvInfo::class;
+    protected static $instantiationClientClassName = \Magnolia\Client\EnvInfo::class;
 
     public function getServerName(): string
     {

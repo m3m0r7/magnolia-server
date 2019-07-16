@@ -8,7 +8,7 @@ final class Camera extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'Camera';
     protected $loggerLevel = Logger::DEBUG;
-    protected $instantiationClientClassName = \Magnolia\Client\Camera::class;
+    protected static $instantiationClientClassName = \Magnolia\Client\Camera::class;
 
     public function getServerName(): string
     {

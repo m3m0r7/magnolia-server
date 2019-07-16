@@ -83,7 +83,7 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
                 $id = $user['id'];
                 [ $packet ] = $parameters;
                 Storage::put(
-                    '/' . $id . '/' . time() . '.jpg',
+                    '/' . $id . '/' . date('Ymd') . '/' . time() . '.jpg',
                     $packet,
                     [
                         'extension' => 'jpg',

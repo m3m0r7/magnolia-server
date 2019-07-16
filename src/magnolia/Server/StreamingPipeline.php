@@ -9,7 +9,7 @@ use Monolog\Logger;
 final class StreamingPipeline extends GenericServer implements ServerInterface
 {
     protected $loggerChannelName = 'StreamingPipeline';
-    protected $instantiationClientClassName = \Magnolia\Client\StreamingPipeline::class;
+    protected static $instantiationClientClassName = \Magnolia\Client\StreamingPipeline::class;
     protected $synchronizeKey = SynchronizerKeys::CLIENT_FROM_STREAMING_PIPELINE;
     protected $clientStreamClass = WebSocketStream::class;
 
