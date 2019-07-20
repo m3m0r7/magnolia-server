@@ -12,7 +12,7 @@ final class PreflightRequest extends AbstractAPIContents implements APIContentsI
     {
         return [
             'Access-Control-Allow-Method' => '*',
-            'Access-Control-Allow-Headers' => 'content-type',
+            'Access-Control-Allow-Headers' => 'content-type, x-auth-key',
         ] + parent::getResponseHeaders();
     }
 }
