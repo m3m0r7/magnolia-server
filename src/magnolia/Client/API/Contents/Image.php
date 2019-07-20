@@ -17,17 +17,18 @@ final class Image extends AbstractAPIContents implements APIContentsInterface
                 'You did not logged-in.'
             );
         }
-        $id = str_replace('/', '', $this->getQuery()->get('id'));
-        $date = str_replace('/', '', $this->getQuery()->get('date'));
+
+        // ID is a timestamp
+        $id = (int) $this->getQuery()->get('id');
+        $date = date('Ym', $id);
 
         $user = $this->getSession()->read('user');
         $userId = $user['id'];
-        $file = "/{$userId}/{$date}.jpg";
+        $file = "/{$userId}/{$date}/{$id}.jpg";
 
-        if (
-            $id !== $userId ||
-            !is_file(Storage::getPath($file))
-        ) {
+        var_dump($file);
+
+        if (!is_file(Storage::getPath($file))) {
             return $this->returnNotFound(
                 'Image not found.'
             );

@@ -21,7 +21,6 @@ final class Camera extends AbstractClient implements ClientInterface
     use \Magnolia\Traits\AuthKeyValidatable;
 
     protected $loggerChannelName = 'Camera.Client';
-    protected $loggerLevel = Logger::DEBUG;
 
     public function start(): void
     {

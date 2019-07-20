@@ -73,10 +73,12 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
     public function getPostResponseBody(): array
     {
         if ($this->getQuery()->get('mode') === 'static') {
-            $id = $this->getSession()->read('user');
+            $id = $this->getSession()->read('user')['id'];
             Storage::put(
-                '/' . $id . '/' . date('Ymd') . '/' . time() . '.jpg',
-                Storage::getPath('/record/image.jpg'),
+                '/' . $id . '/' . date('Ym') . '/' . time() . '.jpg',
+                file_get_contents(
+                    Storage::getPath('/record/image.jpg')
+                ),
                 [
                     'extension' => 'jpg',
                     'time' => time(),
@@ -96,7 +98,7 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
                 $id = $user['id'];
                 [ $packet ] = $parameters;
                 Storage::put(
-                    '/' . $id . '/' . date('Ymd') . '/' . time() . '.jpg',
+                    '/' . $id . '/' . date('Ym') . '/' . time() . '.jpg',
                     $packet,
                     [
                         'extension' => 'jpg',
