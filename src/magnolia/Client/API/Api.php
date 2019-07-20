@@ -93,7 +93,7 @@ final class Api extends AbstractClient implements ClientInterface
 
         if (
             ($routingInfo['auth_key'] ?? false) === true &&
-            !$this->isValidAuthKey($this->requestHeaders['x-auth-key'])
+            !$this->isValidAuthKey($this->requestHeaders['x-auth-key'] ?? '')
         ) {
             $this->emit(
                 new Unauthorized(

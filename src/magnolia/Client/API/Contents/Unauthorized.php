@@ -11,7 +11,7 @@ final class Unauthorized extends AbstractAPIContents implements APIContentsInter
     public function getResponseBody(): array
     {
         return $this->returnUnauthorized(
-            'The API does not implemented.'
+            'Unauthorized.'
         );
     }
 }
