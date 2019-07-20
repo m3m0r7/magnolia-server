@@ -43,7 +43,7 @@ trait ProcedureManageable
         }
 
         $restoreProcedures = [];
-        while ($procedure->isEmpty()) {
+        while (!$procedure->isEmpty()) {
             [ $callback, $targetKey, $parameters ] = $task = $procedure->pop();
             if ($targetKey !== $key) {
                 $restoreProcedures[] = $procedure->pop();

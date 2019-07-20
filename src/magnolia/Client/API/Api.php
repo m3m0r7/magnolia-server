@@ -25,6 +25,7 @@ final class Api extends AbstractClient implements ClientInterface
     use \Magnolia\Traits\BodyReadable;
     use \Magnolia\Traits\HTTPEmittable;
     use \Magnolia\Traits\AuthKeyValidatable;
+    use \Magnolia\Traits\HTTPInfoAssignable;
 
     protected $loggerChannelName = 'API.Client';
 
@@ -35,34 +36,21 @@ final class Api extends AbstractClient implements ClientInterface
         }
 
         $this->proceedBody($this->requestHeaders);
+        $this->assignHttpInfo($this->requestHeaders);
 
-        $firstLine = preg_replace('/\s+/', ' ', $this->requestHeaders[0] ?? '');
-        $header = explode(' ', $firstLine);
-        if (count($header) < 2) {
+        if (!in_array($this->method, static::ALLOWED_METHODS, true)) {
             $this->disconnect();
             return;
         }
-
-        [ $method, $path ] = $header;
-        $splitPath = explode('?', $path, 2);
-        $path = $splitPath[0] ?? null;
-        $queryString = $splitPath[1] ?? '';
-
-        if (!in_array($method, static::ALLOWED_METHODS, true)) {
-            $this->disconnect();
-            return;
-        }
-
-        $query = new Query($queryString);
 
         // API needs to allow pre-flight request.
-        if ($method === 'OPTIONS') {
+        if ($this->method === 'OPTIONS') {
             $this->emit(
                 new PreflightRequest(
                     $this,
-                    $method,
-                    $path,
-                    $query,
+                    $this->method,
+                    $this->path,
+                    $this->query,
                     $this->requestHeaders,
                     $this->requestBody
                 )
@@ -70,20 +58,20 @@ final class Api extends AbstractClient implements ClientInterface
             return;
         }
 
-        $routingInfo = $this->routingMap($path);
+        $routingInfo = $this->routingMap($this->path);
 
         if ($routingInfo === null ||
             (
-                !in_array($method, $routingInfo['method'], true) &&
+                !in_array($this->method, $routingInfo['method'], true) &&
                 !in_array('*', $routingInfo['method'], true)
             )
         ) {
             $this->emit(
                 new NotFound(
                     $this,
-                    $method,
-                    $path,
-                    $query,
+                    $this->method,
+                    $this->path,
+                    $this->query,
                     $this->requestHeaders,
                     $this->requestBody
                 )
@@ -98,9 +86,9 @@ final class Api extends AbstractClient implements ClientInterface
             $this->emit(
                 new Unauthorized(
                     $this,
-                    $method,
-                    $path,
-                    $query,
+                    $this->method,
+                    $this->path,
+                    $this->query,
                     $this->requestHeaders,
                     $this->requestBody
                 )
@@ -114,9 +102,9 @@ final class Api extends AbstractClient implements ClientInterface
         $classPath = $routingInfo['resource'];
         $class = new $classPath(
             $this,
-            $method,
-            $path,
-            $query,
+            $this->method,
+            $this->path,
+            $this->query,
             $this->requestHeaders,
             $this->requestBody
         );

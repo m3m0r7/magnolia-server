@@ -42,8 +42,7 @@ final class Camera extends AbstractClient implements ClientInterface
 
         while (true) {
             $nextUpdateImage = 0;
-            while ($sizePacket = $this->client->read(4)) {
-                $authKey = $this->client->read($authKeySize);
+            while ($authKey = $this->client->read($authKeySize)) {
 
                 // Validate the first packet.
                 if (!$this->isValidAuthKey($authKey)) {
@@ -51,6 +50,7 @@ final class Camera extends AbstractClient implements ClientInterface
                     return;
                 }
 
+                $sizePacket = $this->client->read(4);
                 $size = current(unpack('L', $sizePacket));
                 if ($size === 0 || $size > getenv('MAX_CAMERA_FRAME_SIZE')) {
                     continue;
@@ -67,11 +67,12 @@ final class Camera extends AbstractClient implements ClientInterface
                         // Listed value is JPEG and JPG.
                         "\xff\xd8\xdd\xe0",
                         "\xff\xd8\xff\xee",
+                        "\xff\xd8\xff\xdb",
                     ],
                     true
                 )) {
                     $illegalCounter[Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE]++;
-                    if ($illegalCounter[Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE] > getenv(Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE)) {
+                    if ($illegalCounter[Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE] >= getenv(Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE)) {
                         // Not allowed connection.
                         $this->disconnect();
                         return;

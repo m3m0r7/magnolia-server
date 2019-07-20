@@ -47,7 +47,7 @@ final class Synchronizer
     {
         while($this->isLocked()) {
             // This is CPU Usage controlling.
-            usleep(1);
+            usleep(20);
         }
     }
 

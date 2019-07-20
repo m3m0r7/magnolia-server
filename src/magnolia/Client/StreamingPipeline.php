@@ -18,6 +18,8 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
     use \Magnolia\Traits\ClientManageable;
     use \Magnolia\Traits\HeaderReadable;
     use \Magnolia\Traits\ImageRenderable;
+    use \Magnolia\Traits\AuthKeyValidatable;
+    use \Magnolia\Traits\HTTPInfoAssignable;
 
     /**
      * @var WebSocketStream $client
@@ -33,6 +35,14 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
         }
 
         if (!isset($this->requestHeaders['sec-websocket-key'])) {
+            $this->disconnect();
+            return;
+        }
+
+        // parse query
+        $this->assignHttpInfo($this->requestHeaders);
+
+        if (!$this->isValidAuthKey($this->query->get('auth_key'))) {
             $this->disconnect();
             return;
         }
