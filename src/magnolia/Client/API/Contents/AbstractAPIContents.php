@@ -30,14 +30,14 @@ abstract class AbstractAPIContents implements APIContentsInterface
         ClientInterface $client,
         string $method,
         string $path,
-        string $queryString,
+        Query $query,
         array $headers = [],
         ?string $content = null
     ) {
         $this->client = $client;
         $this->method = strtoupper($method);
         $this->path = $path;
-        $this->query = new Query($queryString);
+        $this->query = $query;
         $this->headers = $headers;
         $this->content = $content;
 

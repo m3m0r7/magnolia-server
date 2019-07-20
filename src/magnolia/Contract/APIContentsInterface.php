@@ -1,13 +1,15 @@
 <?php
 namespace Magnolia\Contract;
 
+use Magnolia\Operation\Middleware\Query;
+
 interface APIContentsInterface
 {
     public function __construct(
         ClientInterface $client,
         string $method,
         string $path,
-        string $queryString,
+        Query $query,
         array $headers = [],
         ?string $content = null
     );

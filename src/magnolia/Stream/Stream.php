@@ -60,6 +60,9 @@ class Stream
 
     public function read(int $bytes = 1): string
     {
+        if ($bytes <= 0) {
+            return '';
+        }
         $remaining = $bytes;
         $data = '';
         do {

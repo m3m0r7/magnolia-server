@@ -18,6 +18,7 @@ final class Camera extends AbstractClient implements ClientInterface
 {
     use \Magnolia\Traits\ClientManageable;
     use \Magnolia\Traits\ProcedureManageable;
+    use \Magnolia\Traits\AuthKeyValidatable;
 
     protected $loggerChannelName = 'Camera.Client';
     protected $loggerLevel = Logger::DEBUG;
@@ -25,6 +26,7 @@ final class Camera extends AbstractClient implements ClientInterface
     public function start(): void
     {
         \Swoole\Runtime::enableCoroutine();
+
         /**
          * @var Channel $channel
          * @var Synchronizer $synchronizer
@@ -36,9 +38,19 @@ final class Camera extends AbstractClient implements ClientInterface
             Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE => 0,
         ];
 
+        $authKeySize = strlen(getenv('AUTH_KEY'));
+
         while (true) {
             $nextUpdateImage = 0;
             while ($sizePacket = $this->client->read(4)) {
+                $authKey = $this->client->read($authKeySize);
+
+                // The first packet fail to validate as an auth key.
+                if (!$this->isValidAuthKey($authKey)) {
+                    $this->disconnect();
+                    return;
+                }
+
                 $size = current(unpack('L', $sizePacket));
                 if ($size === 0 || $size > getenv('MAX_CAMERA_FRAME_SIZE')) {
                     continue;
