@@ -45,7 +45,7 @@ final class Camera extends AbstractClient implements ClientInterface
             while ($sizePacket = $this->client->read(4)) {
                 $authKey = $this->client->read($authKeySize);
 
-                // The first packet fail to validate as an auth key.
+                // Validate the first packet.
                 if (!$this->isValidAuthKey($authKey)) {
                     $this->disconnect();
                     return;
