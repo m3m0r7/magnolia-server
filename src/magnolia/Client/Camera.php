@@ -5,6 +5,7 @@ use Magnolia\Contract\ClientInterface;
 use Magnolia\Enum\ProcedureKeys;
 use Magnolia\Enum\Runtime;
 use Magnolia\Enum\SynchronizerKeys;
+use Magnolia\Enum\Validation;
 use Magnolia\Stream\Stream;
 use Magnolia\Stream\WebSocketStream;
 use Magnolia\Synchronization\Synchronizer;
@@ -31,17 +32,43 @@ final class Camera extends AbstractClient implements ClientInterface
         $channel = $this->channels[\Magnolia\Server\StreamingPipeline::class];
         $synchronizer = $this->synchronizers[SynchronizerKeys::CLIENT_FROM_STREAMING_PIPELINE];
 
+        $illegalCounter = [
+            Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE => 0,
+        ];
+
         while (true) {
             $nextUpdateImage = 0;
             while ($sizePacket = $this->client->read(4)) {
                 $size = current(unpack('L', $sizePacket));
-                if ($size === 0) {
+                if ($size === 0 || $size > getenv('MAX_CAMERA_FRAME_SIZE')) {
                     continue;
                 }
 
                 $this->logger->debug('Received ' . $size);
 
                 $packet = $this->client->read($size);
+
+                // validate jpeg
+                if (!in_array(
+                    substr($packet, 0, 4),
+                    [
+                        // Listed value is JPEG and JPG.
+                        "\xff\xd8\xdd\xe0",
+                        "\xff\xd8\xff\xee",
+                    ],
+                    true
+                )) {
+                    $illegalCounter[Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE]++;
+                    if ($illegalCounter[Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE] > getenv(Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE)) {
+                        // Not allowed connection.
+                        $this->disconnect();
+                        return;
+                    }
+                    continue;
+                }
+
+                // Reset illegal counter.
+                $illegalCounter[Validation::MAX_COUNT_VALIDATION_FRAME_MAGIC_BYTE] = 0;
 
                 if ($nextUpdateImage < time()) {
                     $nextUpdateImage = time() + Runtime::UPDATE_IMAGE_INTERVAL;
@@ -62,10 +89,7 @@ final class Camera extends AbstractClient implements ClientInterface
                 }
 
                 go(function () use ($packet, $channel, $synchronizer) {
-                    $this->proceedProcedure(
-                        ProcedureKeys::CAPTURE_FAVORITE,
-                        $packet
-                    );
+                    $this->proceedProcedure(ProcedureKeys::CAPTURE_FAVORITE, $packet);
                     $synchronizer->lock();
                     $tempClientConnections = [];
                     while (!$channel->isEmpty()) {

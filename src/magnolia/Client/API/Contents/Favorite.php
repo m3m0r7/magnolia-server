@@ -72,6 +72,19 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
 
     public function getPostResponseBody(): array
     {
+        if ($this->getQuery()->get('mode') === 'static') {
+            $id = $this->getSession()->read('user');
+            Storage::put(
+                '/' . $id . '/' . date('Ymd') . '/' . time() . '.jpg',
+                Storage::getPath('/record/image.jpg'),
+                [
+                    'extension' => 'jpg',
+                    'time' => time(),
+                    'camera_number' => 0
+                ]
+            );
+            return $this->returnOK();
+        }
         $this->pushToProcedureStack(
             \Magnolia\Client\Camera::class,
             ProcedureKeys::CAPTURE_FAVORITE,
