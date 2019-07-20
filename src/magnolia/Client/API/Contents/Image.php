@@ -26,8 +26,6 @@ final class Image extends AbstractAPIContents implements APIContentsInterface
         $userId = $user['id'];
         $file = "/{$userId}/{$date}/{$id}.jpg";
 
-        var_dump($file);
-
         if (!is_file(Storage::getPath($file))) {
             return $this->returnNotFound(
                 'Image not found.'
