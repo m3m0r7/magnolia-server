@@ -27,7 +27,7 @@ RUN git clone https://github.com/swoole/swoole-src.git
 RUN cd swoole-src && \
     git checkout v4.3.5 && \
     phpize && \
-    ./configure && \
+    ./configure --enable-openssl && \
     make && \
     make install
 

@@ -12,7 +12,7 @@ use Swoole\Coroutine\Channel;
  */
 trait AuthKeyValidatable
 {
-    public function isValidAuthKey(string $authKey): bool
+    public function isValidAuthKey(?string $authKey): bool
     {
         if ($authKey === getenv('AUTH_KEY')) {
             return true;

@@ -5,6 +5,7 @@
         "ext-swoole": "*",
         "ext-json": "*",
         "ext-gd": "*",
+        "ext-openssl": "*",
         "monolog/monolog": "^1.24",
         "vlucas/phpdotenv": "^3.4",
         "ramsey/uuid": "^3.8"

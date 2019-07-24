@@ -15,8 +15,6 @@ class Stream
     public function __construct($stream)
     {
         stream_set_timeout($stream, 1, 0);
-        stream_set_write_buffer($stream, 0);
-        stream_set_read_buffer($stream, 0);
 
         $this->peer = stream_socket_get_name(
             $stream,

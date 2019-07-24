@@ -4,3 +4,5 @@ composer.lock
 .env
 users.json
 test.html
+ssl
+.DS_Store

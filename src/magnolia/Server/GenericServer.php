@@ -9,20 +9,38 @@ use Monolog\Logger;
 
 class GenericServer extends AbstractServer implements ServerInterface
 {
+    use \Magnolia\Traits\SecureConnectionManageable;
+
     /**
      * @throws ServerInterruptException
      */
     public function run(): void
     {
         \Swoole\Runtime::enableCoroutine();
+
         while (true) {
+            $context = stream_context_create();
+
+            if ($this->isEnabledTLS()) {
+                // Write SSL Context
+                $this->writeTLSContext($context);
+            }
+
             $server = stream_socket_server(
                 sprintf(
-                    'tcp://%s:%d',
+                    ($this->isEnabledTLS() ? 'tls' : 'tcp') . '://%s:%d',
                     $this->getListenHost(),
                     $this->getListenPort(),
-                )
+                ),
+                $errno,
+                $errstr,
+                STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
+                $context
             );
+
+            if ($this->isEnabledTLS()) {
+                stream_socket_enable_crypto($server, false);
+            }
 
             if ($server === false) {
                 throw new ServerInterruptException('Failed to start server.');
@@ -45,6 +63,14 @@ class GenericServer extends AbstractServer implements ServerInterface
             while (true) {
                 try {
                     while ($client = @stream_socket_accept($server, 0)) {
+                        if ($this->isEnabledTLS()) {
+                            stream_socket_enable_crypto(
+                                $client,
+                                true,
+                                STREAM_CRYPTO_METHOD_TLSv1_2_SERVER
+                            );
+                        }
+
                         // Check channel connections.
                         if ($channel->isFull()) {
                             $this->logger->info(
