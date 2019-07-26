@@ -3,12 +3,11 @@ namespace Magnolia\Traits;
 
 trait SecureConnectionManageable
 {
-    private $allowSelfSign = true;
-    private $verifyPeer = false;
+    protected $enableSSL = true;
 
     public function isEnabledTLS(): bool
     {
-        return ((int) getenv('SSL_ENABLE')) === 1;
+        return $this->enableSSL && ((int) getenv('SSL_ENABLE')) === 1;
     }
 
     public function writeTLSContext(&$context): void
