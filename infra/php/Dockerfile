@@ -23,9 +23,10 @@ RUN yum -y install --enablerepo=remi-php73 \
 
 ## Install swoole from source
 WORKDIR /tmp
+RUN echo hogehoge
 RUN git clone https://github.com/swoole/swoole-src.git
 RUN cd swoole-src && \
-    git checkout v4.4.2 && \
+    git checkout refs/tags/v4.4.2 && \
     phpize && \
     ./configure --enable-openssl && \
     make && \
