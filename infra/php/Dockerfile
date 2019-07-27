@@ -25,7 +25,7 @@ RUN yum -y install --enablerepo=remi-php73 \
 WORKDIR /tmp
 RUN git clone https://github.com/swoole/swoole-src.git
 RUN cd swoole-src && \
-    git checkout v4.3.5 && \
+    git checkout v4.4.2 && \
     phpize && \
     ./configure --enable-openssl && \
     make && \
