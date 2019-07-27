@@ -82,7 +82,14 @@ class Stream
 
     public function emit(): void
     {
-        fwrite($this->stream, $this->buffers);
+        // Split chunks because Swoole show an error when sent big data to a client.
+        // See: https://github.com/swoole/swoole-src/issues/2667
+        $chunkSize = 8192 * 2;
+        $chunks = str_split($this->buffers, $chunkSize);
+
+        foreach ($chunks as $chunk) {
+            fwrite($this->stream, $chunk);
+        }
 
         // Do empty buffers
         $this->buffers = '';
