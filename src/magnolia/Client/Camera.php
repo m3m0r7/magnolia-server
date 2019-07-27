@@ -20,6 +20,8 @@ final class Camera extends AbstractClient implements ClientInterface
     use \Magnolia\Traits\ProcedureManageable;
     use \Magnolia\Traits\AuthKeyValidatable;
 
+    const CHUNK_SIZE = 8192 * 2;
+
     protected $loggerChannelName = 'Camera.Client';
 
     public function start(): void
@@ -117,15 +119,18 @@ final class Camera extends AbstractClient implements ClientInterface
                             continue;
                         }
 
-                        // send packets
-                        $client
-                            ->enableBuffer(false)
-                            ->write(
-                                WebSocket::encodeMessage(
-                                    $client,
-                                    'data:image/jpeg;base64,' . base64_encode($packet)
-                                )
-                            );
+                        // Split chunks because Swoole show an error when sent big data to a client.
+                        // See: https://github.com/swoole/swoole-src/issues/2667
+                        $data = WebSocket::encodeMessage(
+                            $client,
+                            'data:image/jpeg;base64,' . base64_encode($packet)
+                        );
+
+                        foreach (str_split($data, static::CHUNK_SIZE) as $chunkData) {
+                            $client
+                                ->enableBuffer(false)
+                                ->write($chunkData);
+                        }
 
                         $tempClientConnections[] = $client;
                     }
