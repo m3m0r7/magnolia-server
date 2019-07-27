@@ -117,14 +117,21 @@ final class Camera extends AbstractClient implements ClientInterface
                             continue;
                         }
 
-                        $client
-                            ->enableBuffer(false)
-                            ->write(
-                                WebSocket::encodeMessage(
-                                    $client,
-                                    'data:image/jpeg;base64,' . base64_encode($packet)
-                                )
-                            );
+                        $data = 'data:image/jpeg;base64,' . base64_encode($packet);
+
+                        for ($i = 1, $chunks = str_split($data, $client->getChunkSize()), $loops = count($chunks); $i <= $loops; $i++) {
+                            $client
+                                ->enableBuffer(false)
+                                ->enableChunk(false)
+                                ->write(
+                                    WebSocket::encodeMessage(
+                                        $client,
+                                        $chunks[$i - 1],
+                                        WebSocket::OPCODE_MESSAGE,
+                                        $i === $loops
+                                    )
+                                );
+                        }
 
                         $tempClientConnections[] = $client;
                     }

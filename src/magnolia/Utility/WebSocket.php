@@ -73,7 +73,7 @@ final class WebSocket
         ];
     }
 
-    public static function encodeMessage(WebSocketStream $client, string $payload, int $opcode = self::OPCODE_MESSAGE): string
+    public static function encodeMessage(WebSocketStream $client, string $payload, int $opcode = self::OPCODE_MESSAGE, bool $isFin = true): string
     {
         $length = strlen($payload);
         $type = ($length > 0xffff ? 127 : ($length <= 0xffff && $length >= 126 ? 126 : $length));
@@ -83,7 +83,7 @@ final class WebSocket
         // set fin already.
         $body .= chr(
             // Fin + RSV1 + RSV2 + RSV3 + opcode
-            128 + $opcode
+            (($isFin ? 1 : 0) * 128) + $opcode
         );
 
         $body .= chr(

@@ -11,6 +11,8 @@ class Stream
     protected $buffering = false;
     protected $peer = null;
     protected $uuid = null;
+    protected $chunk = true;
+    protected $chunkSize = 8192;
 
     public function __construct($stream)
     {
@@ -40,6 +42,17 @@ class Stream
     {
         $this->buffering = $enable;
         return $this;
+    }
+
+    public function enableChunk(bool $enable): self
+    {
+        $this->chunk = $enable;
+        return $this;
+    }
+
+    public function getChunkSize()
+    {
+        return $this->chunkSize;
     }
 
     public function write(string $data): self
@@ -82,13 +95,12 @@ class Stream
 
     public function emit(): void
     {
-        // Split chunks because Swoole show an error when sent big data to a client.
-        // See: https://github.com/swoole/swoole-src/issues/2667
-        $chunkSize = 8192 * 2;
-        $chunks = str_split($this->buffers, $chunkSize);
-
-        foreach ($chunks as $chunk) {
-            fwrite($this->stream, $chunk);
+        if ($this->chunk) {
+            foreach (str_split($this->buffers, $this->chunkSize) as $chunk) {
+                fwrite($this->stream, $chunk);
+            }
+        } else {
+            fwrite($this->stream, $this->buffers);
         }
 
         // Do empty buffers
