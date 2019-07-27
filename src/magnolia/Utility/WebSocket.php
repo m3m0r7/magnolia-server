@@ -7,7 +7,7 @@ use Magnolia\Stream\WebSocketStream;
 
 final class WebSocket
 {
-    const OPCODE_FIN = 0x00;
+    const OPCODE_CONTINUATION = 0x00;
     const OPCODE_MESSAGE = 0x01;
     const OPCODE_BINARY = 0x02;
     const OPCODE_CLOSE = 0x08;
@@ -30,7 +30,7 @@ final class WebSocket
         if (!in_array(
             $opcode,
             [
-                static::OPCODE_FIN,
+                static::OPCODE_CONTINUATION,
                 static::OPCODE_MESSAGE,
                 static::OPCODE_BINARY,
                 static::OPCODE_CLOSE,

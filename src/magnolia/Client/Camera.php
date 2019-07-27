@@ -127,7 +127,9 @@ final class Camera extends AbstractClient implements ClientInterface
                                     WebSocket::encodeMessage(
                                         $client,
                                         $chunks[$i - 1],
-                                        WebSocket::OPCODE_MESSAGE,
+                                        $i === 1
+                                            ? WebSocket::OPCODE_MESSAGE
+                                            : WebSocket::OPCODE_CONTINUATION,
                                         $i === $loops
                                     )
                                 );
