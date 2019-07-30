@@ -13,6 +13,8 @@ interface ServerInterface
 
     public function getListenPort(): int;
 
+    public function listen(\Swoole\Server $server): void;
+
     public static function getInstantiationClientClassName(): ?string;
 }
 

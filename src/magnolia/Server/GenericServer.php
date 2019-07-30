@@ -11,117 +11,74 @@ class GenericServer extends AbstractServer implements ServerInterface
 {
     use \Magnolia\Traits\SecureConnectionManageable;
 
-    /**
-     * @throws ServerInterruptException
-     */
+    public function listen(\Swoole\Server $server): void
+    {
+        $instantiateServer = $server->addListener(
+            $this->getListenHost(),
+            $this->getListenPort(),
+            SWOOLE_SOCK_TCP | SWOOLE_SSL
+        );
+
+        $instantiateServer->set([
+            'ssl_cert_file' => getenv('SSL_CERTIFICATE_FILE'),
+            'ssl_key_file' => getenv('SSL_CERTIFICATE_KEY'),
+            'ssl_verify_peer' => false,
+            'ssl_allow_self_signed' => true,
+        ]);
+
+        $this->logger->info(
+            'Server is running.',
+            [
+                "{$this->getListenHost()}:{$this->getListenPort()}"
+            ]
+        );
+
+        $instantiateServer->on(
+            'receive',
+            function (\Swoole\Server $server, int $fd, int $reactorId, string $data) {
+                /**
+                 * @var \Swoole\Coroutine\Channel $channel
+                 * @var Stream $clientStream
+                 */
+                $channel = $this->channels[static::class];
+                $synchronizer = $this->synchronizers[$this->synchronizeKey] ?? null;
+
+                // Check channel connections.
+                if ($channel->isFull()) {
+                    $this->logger->info(
+                        'Failed to connect because it is over MAX_CONNECTIONS.'
+                    );
+                    return;
+                }
+
+                $connections = $channel->length();
+                $this->logger->info($channel->length() . ' connections currently.');
+
+                $streamClass = $this->clientStreamClass;
+                $stream = fopen('php://memory', 'rw');
+                fwrite($stream, $data);
+                rewind($stream);
+                $clientStream = new $streamClass(
+                    $server,
+                    $stream,
+                    $fd,
+                    $reactorId
+                );
+                $channel->push($clientStream);
+
+                $instantiationClientClassName = $this->getInstantiationClientClassName();
+                (new $instantiationClientClassName(
+                    $clientStream,
+                    $this->channels,
+                    $this->synchronizers,
+                    $this->procedures
+                ))->start();
+            }
+        );
+    }
+
     public function run(): void
     {
-        \Swoole\Runtime::enableCoroutine();
-
-        while (true) {
-            $context = stream_context_create();
-
-            if ($this->isEnabledTLS()) {
-                // Write SSL Context
-                $this->writeTLSContext($context);
-            }
-
-            $server = stream_socket_server(
-                sprintf(
-                    ($this->isEnabledTLS() ? 'tls' : 'tcp') . '://%s:%d',
-                    $this->getListenHost(),
-                    $this->getListenPort(),
-                ),
-                $errno,
-                $errstr,
-                STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
-                $context
-            );
-
-            if ($this->isEnabledTLS()) {
-                stream_socket_enable_crypto($server, false);
-            }
-
-            if ($server === false) {
-                throw new ServerInterruptException('Failed to start server.');
-            }
-
-            $this->logger->info(
-                'Server is running.',
-                [
-                    "{$this->getListenHost()}:{$this->getListenPort()}"
-                ]
-            );
-
-            /**
-             * @var \Swoole\Coroutine\Channel $channel
-             * @var Synchronizer|null $synchronizer
-             */
-            $channel = $this->channels[static::class];
-            $synchronizer = $this->synchronizers[$this->synchronizeKey] ?? null;
-            $this->logger->info('Listening started.');
-            while (true) {
-                try {
-                    while ($client = @stream_socket_accept($server, 0)) {
-                        if ($this->isEnabledTLS()) {
-                            stream_socket_enable_crypto(
-                                $client,
-                                true,
-                                STREAM_CRYPTO_METHOD_TLSv1_2_SERVER
-                            );
-                        }
-
-                        // Check channel connections.
-                        if ($channel->isFull()) {
-                            $this->logger->info(
-                                'Failed to connect because it is over MAX_CONNECTIONS.'
-                            );
-
-                            // Force closing session.
-                            fclose($client);
-                            continue;
-                        }
-
-                        // In one case, Google Chrome send 2 connections (pre-flight and fetching document data).
-                        // So, It need asynchronously processing.
-                        go(function () use ($synchronizer, $client, $channel) {
-                            // Lock with synchronizer, the stream does not allowed to write at the same time.
-                            if ($synchronizer !== null) {
-                                $synchronizer->lock();
-                            }
-
-                            $streamClass = $this->clientStreamClass;
-                            $clientStream = new $streamClass($client);
-                            $channel->push($clientStream);
-
-                            // unlock
-                            if ($synchronizer !== null) {
-                                $synchronizer->unlock();
-                            }
-
-                            $connections = $channel->length();
-                            $this->logger->info($channel->length() . ' connections currently.');
-
-                            // If $instantiationClientClassName is null, it means the server not having reacting event.
-                            if (static::$instantiationClientClassName !== null) {
-                                $instantiationClientClassName = static::$instantiationClientClassName;
-                                go([
-                                    new $instantiationClientClassName(
-                                        $clientStream,
-                                        $this->channels,
-                                        $this->synchronizers,
-                                        $this->procedures
-                                    ),
-                                    'start'
-                                ]);
-                            }
-                        });
-                    }
-                } catch (\ErrorException $e) {
-                    // Nothing to do.
-                }
-            }
-        }
     }
 
 }

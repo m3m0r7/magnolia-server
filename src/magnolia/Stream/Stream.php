@@ -6,7 +6,10 @@ use Ramsey\Uuid\Uuid;
 
 class Stream
 {
+    protected $server;
     protected $stream;
+    protected $fd;
+    protected $reactorId;
     protected $buffers = '';
     protected $buffering = false;
     protected $peer = null;
@@ -14,18 +17,15 @@ class Stream
     protected $chunk = true;
     protected $chunkSize = 8192 * 2;
 
-    public function __construct($stream)
+    public function __construct(\Swoole\Server $server, $stream, int $fd, int $reactorId)
     {
-        stream_set_timeout($stream, 1, 0);
-
-        $this->peer = stream_socket_get_name(
-            $stream,
-            true
-        );
-
+        $this->server = $server;
         $this->stream = $stream;
-
-        $this->uuid = Uuid::uuid4();
+        $this->fd = $fd;
+        $info = $server->connection_info($fd);
+        $this->peer = $info['remote_ip'] . ':' . $info['remote_port'];
+        $this->reactorId = $reactorId;
+        $this->uuid = (string) Uuid::uuid4();
     }
 
     public function getPeer(): string
@@ -74,13 +74,7 @@ class Stream
         if ($bytes <= 0) {
             return '';
         }
-        $remaining = $bytes;
-        $data = '';
-        do {
-            $data .= fread($this->stream, $remaining);
-            $remaining = $bytes - strlen($data);
-        } while ($remaining > 0);
-        return $data;
+        return fread($this->stream, $bytes);
     }
 
     public function readLine(): string
@@ -90,18 +84,12 @@ class Stream
 
     public function close(): void
     {
-        fclose($this->stream);
+        $this->server->close($this->fd);
     }
 
     public function emit(): void
     {
-        if ($this->chunk) {
-            foreach (str_split($this->buffers, $this->chunkSize) as $chunk) {
-                fwrite($this->stream, $chunk);
-            }
-        } else {
-            fwrite($this->stream, $this->buffers);
-        }
+        $this->server->send($this->fd, $this->buffers);
 
         // Do empty buffers
         $this->buffers = '';

@@ -50,5 +50,33 @@ trait SecureConnectionManageable
             'verify_peer_name',
             ((int) getenv('SSL_VERIFY_PEER_NAME')) === 1
         );
+
+        stream_context_set_option(
+            $context,
+            'swoole',
+            'ssl_cert_file',
+            getenv('SSL_CERTIFICATE_FILE')
+        );
+
+        stream_context_set_option(
+            $context,
+            'swoole',
+            'ssl_key_file',
+            getenv('SSL_CERTIFICATE_KEY')
+        );
+
+        stream_context_set_option(
+            $context,
+            'swoole',
+            'ssl_allow_self_signed',
+            ((int) getenv('SSL_ALLOW_SELF_SIGN')) === 1
+        );
+
+        stream_context_set_option(
+            $context,
+            'swoole',
+            'ssl_verify_peer',
+            ((int) getenv('SSL_VERIFY_PEER')) === 1
+        );
     }
 }

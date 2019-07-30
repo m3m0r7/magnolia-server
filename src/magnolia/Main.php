@@ -43,24 +43,20 @@ final class Main
             $synchronizers[$key] = new Synchronizer();
         }
 
+        // The loopback
+        $server = new \Swoole\Server('127.0.0.1', '9000');
 
         foreach ($this->events as $eventClass) {
             /**
              * @var \Magnolia\Contract\ServerInterface $event
              */
             $event = new $eventClass($channels, $synchronizers, $procedures);
-            if ($event instanceof TimerInterface) {
-                // if event type is a timer, then run with Swoole\Timer.
-                $channels[$eventClass]->push(
-                    \Swoole\Timer::tick(
-                        $event::getIntervalTime(),
-                        [$event, 'run']
-                    )
-                );
-            } else {
-                go([$event, 'run']);
-            }
+            $event->listen($server);
         }
-        \Swoole\Event::wait();
+
+        $server->on('receive', function (...$parameters) {
+            var_dump($parameters);
+        });
+        $server->start();
     }
 }
