@@ -12,19 +12,15 @@ class Stream
     protected $peer = null;
     protected $uuid = null;
     protected $chunk = true;
-    protected $chunkSize = 8192 * 2;
+    protected $chunkSize = 8192;
 
     public function __construct($stream)
     {
-        stream_set_timeout($stream, 1, 0);
-
+        $this->stream = $stream;
         $this->peer = stream_socket_get_name(
             $stream,
             true
         );
-
-        $this->stream = $stream;
-
         $this->uuid = Uuid::uuid4();
     }
 

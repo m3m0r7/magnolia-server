@@ -59,6 +59,13 @@ class GenericServer extends AbstractServer implements ServerInterface
             while (true) {
                 try {
                     while ($client = @stream_socket_accept($server, 0)) {
+                        if ($this->isEnabledTLS()) {
+                            stream_socket_enable_crypto(
+                                $client,
+                                true,
+                                STREAM_CRYPTO_METHOD_TLSv1_2_SERVER
+                            );
+                        }
 
                         // Check channel connections.
                         if ($channel->isFull()) {
