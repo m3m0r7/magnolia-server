@@ -1,5 +1,11 @@
 version: "3"
 services:
+  nginx:
+    build: infra/nginx
+    container_name: nginx
+    ports:
+      - 41000:41000
+      - 42000:42000
   php:
     build: infra/php
     container_name: php
@@ -9,8 +15,6 @@ services:
     ports:
       - 30000:30000
       - 30001:30001
-      - 31000:31000
-      - 32000:32000
   redis:
     build: infra/redis
     container_name: redis
