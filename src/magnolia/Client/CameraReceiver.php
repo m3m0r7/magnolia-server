@@ -14,13 +14,21 @@ use Magnolia\Utility\WebSocket;
 use Monolog\Logger;
 use Swoole\Coroutine\Channel;
 
-final class Camera extends AbstractClient implements ClientInterface
+final class CameraReceiver extends AbstractClient implements ClientInterface
 {
     use \Magnolia\Traits\ClientManageable;
     use \Magnolia\Traits\ProcedureManageable;
     use \Magnolia\Traits\AuthKeyValidatable;
 
     protected $loggerChannelName = 'Camera.Client';
+
+    protected $io = null;
+
+    public function __construct(Stream $client, array &$channels = [], array &$synchronizers = [], array &$procedures = [])
+    {
+        parent::__construct($client, $channels, $synchronizers, $procedures);
+        $this->io = fopen(sys_get_temp_dir() . '/camera.jpg', 'r+');
+    }
 
     public function start(): void
     {
@@ -30,7 +38,6 @@ final class Camera extends AbstractClient implements ClientInterface
          * @var Channel $channel
          * @var Synchronizer $synchronizer
          */
-        $channel = $this->channels[\Magnolia\Server\StreamingPipeline::class];
         $synchronizer = $this->synchronizers[SynchronizerKeys::CLIENT_FROM_STREAMING_PIPELINE];
 
         $illegalCounter = [
@@ -94,57 +101,13 @@ final class Camera extends AbstractClient implements ClientInterface
                     );
                 }
 
-                // if channel is empty, don't proceed to send image packet to client.
-                // otherwise, send image packet to client in a coroutine.
-                if ($channel->isEmpty()) {
-                    continue;
+                // Write buffer io
+                if (flock($this->io, LOCK_EX)) {
+                    rewind($this->io);
+                    ftruncate($this->io, 0);
+                    fwrite($this->io, $packet);
+                    flock($this->io, LOCK_UN);
                 }
-
-                go(function () use ($packet, $channel, $synchronizer) {
-                    $this->proceedProcedure(ProcedureKeys::CAPTURE_FAVORITE, $packet);
-                    $synchronizer->lock();
-                    $tempClientConnections = [];
-                    while (!$channel->isEmpty()) {
-                        /**
-                         * @var WebSocketStream $client
-                         */
-                        $client = $channel->pop();
-                        if ($client->isDisconnected()) {
-                            continue;
-                        }
-
-                        if (!$client->isEstablishedHandshake()) {
-                            continue;
-                        }
-
-                        $data = 'data:image/jpeg;base64,' . base64_encode($packet);
-
-                        for ($i = 1, $chunks = str_split($data, $client->getChunkSize()), $loops = count($chunks); $i <= $loops; $i++) {
-                            $client
-                                ->enableBuffer(false)
-                                ->enableChunk(false)
-                                ->write(
-                                    WebSocket::encodeMessage(
-                                        $client,
-                                        $chunks[$i - 1],
-                                        $i === 1
-                                            ? WebSocket::OPCODE_MESSAGE
-                                            : WebSocket::OPCODE_CONTINUATION,
-                                        $i === $loops
-                                    )
-                                );
-                        }
-
-                        $tempClientConnections[] = $client;
-                    }
-
-                    while (!empty($tempClientConnections)) {
-                        $channel->push(
-                            array_pop($tempClientConnections)
-                        );
-                    }
-                    $synchronizer->unlock();
-                });
             }
         }
     }

@@ -10,11 +10,13 @@ services:
     build: infra/php
     container_name: php
     tty: true
-    volumes:
-      - ./src:/var/src
     ports:
       - 30000:30000
       - 30001:30001
+    volumes:
+      - ./src:/var/src
+    environment:
+      - BOOTSTRAP=/var/src/bootstraps/bootstrap.php
   redis:
     build: infra/redis
     container_name: redis

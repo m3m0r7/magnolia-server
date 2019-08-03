@@ -88,7 +88,7 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
             return $this->returnOK();
         }
         $this->pushToProcedureStack(
-            \Magnolia\Client\Camera::class,
+            \Magnolia\Client\CameraReceiver::class,
             ProcedureKeys::CAPTURE_FAVORITE,
             function (
                 Channel $procedure,

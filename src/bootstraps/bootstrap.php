@@ -1,21 +1,13 @@
 <?php
-
-require __DIR__ . '/vendor/autoload.php';
-
-$env = Dotenv\Dotenv::create(__DIR__);
-$env->load();
-
-define('ROOT_DIR', __DIR__);
-define('STORAGE_DIR', ROOT_DIR . '/storage');
-
-date_default_timezone_set(getenv('TIMEZONE'));
+require __DIR__ . '/../kernel.php';
 
 try {
+    touch(sys_get_temp_dir() . '/camera.jpg');
+
     (new \Magnolia\Main())
-        ->register(\Magnolia\Server\StreamingPipeline::class)
-        ->register(\Magnolia\Server\Camera::class)
-        ->register(\Magnolia\Server\EnvInfo::class)
         ->register(\Magnolia\Server\API\Api::class)
+        ->register(\Magnolia\Server\CameraReceiver::class)
+        ->register(\Magnolia\Server\CameraDistributor::class)
         ->run();
 
 } catch (\Exception | Error $e) {

@@ -82,18 +82,18 @@ class GenericServer extends AbstractServer implements ServerInterface
                         // So, It need asynchronously processing.
                         go(function () use ($synchronizer, $client, $channel) {
                             // Lock with synchronizer, the stream does not allowed to write at the same time.
-                            if ($synchronizer !== null) {
-                                $synchronizer->lock();
-                            }
+//                            if ($synchronizer !== null) {
+//                                $synchronizer->lock();
+//                            }
 
                             $streamClass = $this->clientStreamClass;
                             $clientStream = new $streamClass($client);
                             $channel->push($clientStream);
 
                             // unlock
-                            if ($synchronizer !== null) {
-                                $synchronizer->unlock();
-                            }
+//                            if ($synchronizer !== null) {
+//                                $synchronizer->unlock();
+//                            }
 
                             $connections = $channel->length();
                             $this->logger->info($channel->length() . ' connections currently.');

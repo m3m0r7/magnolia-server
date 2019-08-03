@@ -34,8 +34,21 @@ RUN cd swoole-src && \
 # Add Swoole extensions into php.ini
 RUN echo extension=swoole.so >> /etc/php.ini
 
+RUN yum install -y wget
+RUN wget https://pecl.php.net/get/inotify-2.0.0.tgz && \
+    tar zxvf inotify-2.0.0.tgz && \
+    cd inotify-2.0.0 && \
+    phpize && \
+    ./configure && \
+    make && \
+    make install
+
+RUN echo extension=inotify.so >> /etc/php.ini
+
+RUN php -m
+
 COPY composer.phar /usr/bin/composer
 
 # Run PHP
 WORKDIR /var/src
-CMD composer -n install &>/dev/null && php /var/src/bootstrap.php
+CMD composer -n install &>/dev/null && php ${BOOTSTRAP}
