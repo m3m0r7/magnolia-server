@@ -4,6 +4,7 @@ namespace Magnolia\Client;
 use Magnolia\Contract\ClientInterface;
 use Magnolia\Enum\KindEnv;
 use Magnolia\Enum\RedisKeys;
+use Magnolia\Exception\StreamIOException;
 use Magnolia\Exception\WebSocketServerException;
 use Magnolia\Stream\Stream;
 use Magnolia\Stream\WebSocketStream;
@@ -118,6 +119,8 @@ final class StreamingPipeline extends AbstractClient implements ClientInterface
                         }
 
                     } catch (WebSocketServerException $e) {
+                    } catch (StreamIOException $e) {
+                        $this->disconnect();
                     }
                 }
             }

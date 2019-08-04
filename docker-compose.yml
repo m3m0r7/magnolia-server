@@ -6,15 +6,34 @@ services:
     ports:
       - 41000:41000
       - 42000:42000
-  php:
+  api_php:
     build: infra/php
-    container_name: php
+    container_name: api_php
+    tty: true
+    volumes:
+      - ./src:/var/src
+    environment:
+      - BOOTSTRAP=/var/src/bootstraps/api.php
+  env_php:
+    build: infra/php
+    container_name: env_php
+    tty: true
+    volumes:
+      - ./src:/var/src
+    ports:
+      - 30001:30001
+    environment:
+      - BOOTSTRAP=/var/src/bootstraps/env.php
+  camera_php:
+    build: infra/php
+    container_name: camera_php
     tty: true
     volumes:
       - ./src:/var/src
     ports:
       - 30000:30000
-      - 30001:30001
+    environment:
+      - BOOTSTRAP=/var/src/bootstraps/camera.php
   redis:
     build: infra/redis
     container_name: redis

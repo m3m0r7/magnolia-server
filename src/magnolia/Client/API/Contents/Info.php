@@ -17,7 +17,12 @@ final class Info extends AbstractAPIContents implements APIContentsInterface
             );
         }
 
-        $parameters = $this->getRedis()->hGetAll(RedisKeys::ENV_INFO);
+        $parameters = [];
+        $hashes = $this->getRedis()->hGetAll(RedisKeys::ENV_INFO);
+        for ($i = 0; $i < count($hashes); $i += 2) {
+            $parameters[$hashes[$i]] = $hashes[$i + 1];
+        }
+
         $data = [
             'temperature'       => (float) ($parameters[KindEnv::KIND_TEMPERATURE] ?? 0),
             'humidity'          => (float) ($parameters[KindEnv::KIND_HUMIDITY] ?? 0),

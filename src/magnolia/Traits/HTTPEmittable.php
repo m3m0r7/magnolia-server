@@ -2,6 +2,7 @@
 namespace Magnolia\Traits;
 
 use Magnolia\Contract\APIContentsInterface;
+use Magnolia\Exception\StreamIOException;
 use Magnolia\Stream\Stream;
 
 /**
@@ -38,8 +39,12 @@ trait HTTPEmittable
         $this->client
             ->write($body);
 
-        // Emit
-        $this->client->emit();
+        try {
+            // Emit
+            $this->client->emit();
+        } catch (StreamIOException $e) {
+
+        }
 
         // Close connection
         $this->disconnect();

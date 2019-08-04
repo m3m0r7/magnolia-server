@@ -6,6 +6,7 @@ use Magnolia\Enum\ProcedureKeys;
 use Magnolia\Enum\Runtime;
 use Magnolia\Enum\SynchronizerKeys;
 use Magnolia\Enum\Validation;
+use Magnolia\Exception\StreamIOException;
 use Magnolia\Stream\Stream;
 use Magnolia\Stream\WebSocketStream;
 use Magnolia\Synchronization\Synchronizer;
@@ -39,8 +40,8 @@ final class Camera extends AbstractClient implements ClientInterface
 
         $authKeySize = strlen(getenv('AUTH_KEY'));
 
-        while (true) {
-            $nextUpdateImage = 0;
+        $nextUpdateImage = 0;
+        try {
             while ($authKey = $this->client->read($authKeySize)) {
 
                 // Validate the first packet.
@@ -102,7 +103,6 @@ final class Camera extends AbstractClient implements ClientInterface
 
                 go(function () use ($packet, $channel, $synchronizer) {
                     $this->proceedProcedure(ProcedureKeys::CAPTURE_FAVORITE, $packet);
-                    $synchronizer->lock();
                     $tempClientConnections = [];
                     while (!$channel->isEmpty()) {
                         /**
@@ -119,20 +119,24 @@ final class Camera extends AbstractClient implements ClientInterface
 
                         $data = 'data:image/jpeg;base64,' . base64_encode($packet);
 
-                        for ($i = 1, $chunks = str_split($data, $client->getChunkSize()), $loops = count($chunks); $i <= $loops; $i++) {
-                            $client
-                                ->enableBuffer(false)
-                                ->enableChunk(false)
-                                ->write(
-                                    WebSocket::encodeMessage(
-                                        $client,
-                                        $chunks[$i - 1],
-                                        $i === 1
-                                            ? WebSocket::OPCODE_MESSAGE
-                                            : WebSocket::OPCODE_CONTINUATION,
-                                        $i === $loops
-                                    )
-                                );
+                        try {
+                            for ($i = 1, $chunks = str_split($data, $client->getChunkSize()), $loops = count($chunks); $i <= $loops; $i++) {
+                                $client
+                                    ->enableBuffer(false)
+                                    ->enableChunk(false)
+                                    ->write(
+                                        WebSocket::encodeMessage(
+                                            $client,
+                                            $chunks[$i - 1],
+                                            $i === 1
+                                                ? WebSocket::OPCODE_MESSAGE
+                                                : WebSocket::OPCODE_CONTINUATION,
+                                            $i === $loops
+                                        )
+                                    );
+                            }
+                        } catch (StreamIOException $e) {
+                            continue;
                         }
 
                         $tempClientConnections[] = $client;
@@ -143,9 +147,11 @@ final class Camera extends AbstractClient implements ClientInterface
                             array_pop($tempClientConnections)
                         );
                     }
-                    $synchronizer->unlock();
                 });
             }
+        } catch (StreamIOException $e) {
+            $this->logger->info('Connection refuse to Camera. CameraReceiver will be shutdown.');
+            $this->disconnect();
         }
     }
 }

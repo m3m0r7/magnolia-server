@@ -10,13 +10,20 @@ use Monolog\Logger;
 final class EnvInfo extends AbstractClient implements ClientInterface
 {
     use \Magnolia\Traits\Redis;
+    use \Magnolia\Traits\ClientManageable;
+    use \Magnolia\Traits\AuthKeyValidatable;
 
     protected $loggerChannelName = 'EnvInfo.Client';
+    protected $loggerLevel = Logger::DEBUG;
 
     public function start(): void
     {
-        $readStartingTag = current(unpack('C', $this->client->read(1)));
-        if ($readStartingTag !== KindEnv::KIND_READ_STARTING) {
+        $authKeySize = strlen(getenv('AUTH_KEY'));
+
+        $authKey = $this->client->read($authKeySize);
+
+        if (!$this->isValidAuthKey($authKey)) {
+            $this->disconnect();
             return;
         }
 
@@ -51,6 +58,7 @@ final class EnvInfo extends AbstractClient implements ClientInterface
                     break;
                 default:
                     // Unknown kind tag
+                    $this->disconnect();
                     return;
             }
             $envs[$kindTag] = $value;
@@ -61,9 +69,9 @@ final class EnvInfo extends AbstractClient implements ClientInterface
                 ]
             );
         }
-
         // Do caching env information to Redis.
         $this->getRedis()->del(RedisKeys::ENV_INFO);
+
         foreach ($envs as $kindTag => $value) {
             $this->getRedis()->hSet(
                 RedisKeys::ENV_INFO,
@@ -71,5 +79,7 @@ final class EnvInfo extends AbstractClient implements ClientInterface
                 $value
             );
         }
+
+        $this->disconnect();
     }
 }

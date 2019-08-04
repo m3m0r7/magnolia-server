@@ -1,6 +1,7 @@
 <?php
 namespace Magnolia\Stream;
 
+use Magnolia\Exception\StreamIOException;
 use Magnolia\Utility\Functions;
 use Ramsey\Uuid\Uuid;
 
@@ -13,6 +14,7 @@ class Stream
     protected $uuid = null;
     protected $chunk = true;
     protected $chunkSize = 8192;
+    protected $disconnected = false;
 
     public function __construct($stream)
     {
@@ -73,7 +75,11 @@ class Stream
         $remaining = $bytes;
         $data = '';
         do {
-            $data .= fread($this->stream, $remaining);
+            $data .= $read = fread($this->stream, $remaining);
+            if (strlen($read) === 0) {
+                $this->disconnected = true;
+                throw new StreamIOException('Cannot read packet ' . $this->getPeer());
+            }
             $remaining = $bytes - strlen($data);
         } while ($remaining > 0);
         return $data;
@@ -96,7 +102,11 @@ class Stream
                 fwrite($this->stream, $chunk);
             }
         } else {
-            fwrite($this->stream, $this->buffers);
+            $wroteLength = fwrite($this->stream, $this->buffers);
+            if ($wroteLength <= 0 || $wroteLength === false) {
+                $this->disconnected = true;
+                throw new StreamIOException('Cannot read packet ' . $this->getPeer());
+            }
         }
 
         // Do empty buffers
@@ -105,7 +115,7 @@ class Stream
 
     public function isDisconnected(): bool
     {
-        return feof($this->stream);
+        return feof($this->stream) || $this->disconnected;
     }
 
     public function getUUID(): string

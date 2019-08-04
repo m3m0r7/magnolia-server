@@ -38,4 +38,4 @@ COPY composer.phar /usr/bin/composer
 
 # Run PHP
 WORKDIR /var/src
-CMD composer -n install &>/dev/null && php /var/src/bootstrap.php
+CMD composer -n install &>/dev/null && php ${BOOTSTRAP}
