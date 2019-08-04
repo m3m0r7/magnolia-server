@@ -6,13 +6,21 @@ services:
     ports:
       - 41000:41000
       - 42000:42000
-  php:
+  camera_php:
     build: infra/php
-    container_name: php
+    container_name: camera_php
     tty: true
     ports:
       - 30000:30000
       - 30001:30001
+    volumes:
+      - ./src:/var/src
+    environment:
+      - BOOTSTRAP=/var/src/bootstraps/camera_bootstrap.php
+  php:
+    build: infra/php
+    container_name: php
+    tty: true
     volumes:
       - ./src:/var/src
     environment:

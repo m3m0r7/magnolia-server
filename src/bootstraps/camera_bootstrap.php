@@ -2,8 +2,11 @@
 require __DIR__ . '/../kernel.php';
 
 try {
+    touch(sys_get_temp_dir() . '/camera.jpg');
+
     (new \Magnolia\Main())
-        ->register(\Magnolia\Server\API\Api::class)
+        ->register(\Magnolia\Server\CameraReceiver::class)
+        ->register(\Magnolia\Server\CameraDistributor::class)
         ->run();
 
 } catch (\Exception | Error $e) {
