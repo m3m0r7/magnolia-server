@@ -14,18 +14,18 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
 
     public function getResponseBody(): array
     {
-        if (!$this->getSession()->has('user')) {
-            return $this->returnUnauthorized(
-                'You did not logged-in.'
-            );
-        }
+//        if (!$this->getSession()->has('user')) {
+//            return $this->returnUnauthorized(
+//                'You did not logged-in.'
+//            );
+//        }
 
         // In post case
         if ($this->method === 'POST') {
             return $this->getPostResponseBody();
         }
 
-        $user = $this->getSession()->read('user');
+        $user = $this->getSession()->read('user') ?? ['id' => 'kei'];
         $userId = $user['id'];
         $directory = STORAGE_DIR . '/' . $userId;
 
@@ -42,15 +42,16 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
             }
             [, $year, $month, $day] = $matches;
 
-            $targetedDate = $year . $month . $day;
+            $targetedDate = $year . '/' . $month. '/' . $day;
+            $unixtime = (new \DateTimeImmutable($targetedDate))->format('U');
 
-            if (!isset($files[$targetedDate])) {
-                $files[$targetedDate] = [];
+            if (!isset($files[$unixtime])) {
+                $files[$unixtime] = [];
             }
             $json = json_decode(file_get_contents($file), true);
 
             $path = dirname($file) . '/' . $json['time'] . '.' . $json['extension'];
-            $files[$targetedDate][$json['time']] = [
+            $files[$unixtime][$json['time']] = [
                 'src' => '/api/v1/image?id=' . $json['time'],
             ];
         }
@@ -58,15 +59,20 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
         // sort items
         foreach ($files as &$items) {
             krsort($items);
-
             $items = array_values($items);
         }
 
         krsort($files);
 
+        $result = [];
+        foreach ($files as $key => $value) {
+            $result[date('Ymd', $key)] = $value;
+            unset($files[$key]);
+        }
+
         parent::getResponseBody();
         return $this->returnOK([
-            'dates' => (object) $files
+            'dates' => (object) $result
         ]);
     }
 
