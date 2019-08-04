@@ -2,6 +2,8 @@
 namespace Magnolia\Traits;
 
 use Magnolia\Contract\ClientInterface;
+use Magnolia\Contract\ProcedureInterface;
+use Magnolia\Enum\ProcedureKeys;
 use Magnolia\Stream\Stream;
 use Monolog\Logger;
 use Swoole\Coroutine\Channel;
@@ -14,55 +16,25 @@ trait ProcedureManageable
 {
     public function pushToProcedureStack(
         string $procedureTargetClass,
-        int $key,
-        callable $callback,
+        string $key,
+        string $callbackClass,
         ...$parameters
     ): void {
-        /**
-         * @var Channel $procedure
-         */
-        $procedure = $this->client->getProcedures()[$procedureTargetClass] ?? null;
-        if ($procedure === null) {
-            return;
-        }
-        $procedure->push([
-            $callback,
+        $this->getRedis()->lPush(
             $key,
-            $parameters,
-        ]);
+            serialize([$callbackClass, $parameters])
+        );
     }
 
-    public function proceedProcedure(int $key, ...$anyParameters): void
+    public function proceedProcedure(string $key, ...$anyParameters): void
     {
-        /**
-         * @var Channel $procedure
-         */
-        $procedure = $this->procedures[static::class] ?? null;
-        if ($procedure === null) {
-            return;
-        }
-
-        $restoreProcedures = [];
-        while (!$procedure->isEmpty()) {
-            [ $callback, $targetKey, $parameters ] = $task = $procedure->pop();
-            if ($targetKey !== $key) {
-                $restoreProcedures[] = $procedure->pop();
-                continue;
-            }
-            $this->logger->debug(
-                'Fired procedure (KeyId: ' . $targetKey . ')'
-            );
-            $callback(
-                $procedure,
-                ...$parameters,
-                ...$anyParameters
-            );
-        }
-
-        foreach ($restoreProcedures as $restoreProcedure) {
-            $procedure->push(
-                $restoreProcedures
-            );
+        while (($pair = $this->getRedis()->rPop($key)) !== null) {
+            [ $callbackClass, $userParameters ] = unserialize($pair);
+            /**
+             * @var ProcedureInterface $procedure
+             */
+            $procedure = new $callbackClass();
+            $procedure->exec(...array_merge($userParameters, $anyParameters));
         }
     }
 }

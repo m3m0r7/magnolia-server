@@ -13,7 +13,7 @@ class Stream
     protected $peer = null;
     protected $uuid = null;
     protected $chunk = true;
-    protected $chunkSize = 8192;
+    protected $chunkSize = 8192 * 2;
     protected $disconnected = false;
 
     public function __construct($stream)

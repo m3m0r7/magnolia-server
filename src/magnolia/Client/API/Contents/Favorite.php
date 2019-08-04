@@ -4,6 +4,7 @@ namespace Magnolia\Client\API\Contents;
 use Magnolia\Contract\APIContentsInterface;
 use Magnolia\Enum\ProcedureKeys;
 use Magnolia\Enum\Runtime;
+use Magnolia\Procedures\CaptureFavorite;
 use Magnolia\Traits\ProcedureManageable;
 use Magnolia\Utility\Storage;
 use Swoole\Coroutine\Channel;
@@ -11,21 +12,21 @@ use Swoole\Coroutine\Channel;
 final class Favorite extends AbstractAPIContents implements APIContentsInterface
 {
     use ProcedureManageable;
+    use \Magnolia\Traits\Redis;
 
     public function getResponseBody(): array
     {
-//        if (!$this->getSession()->has('user')) {
-//            return $this->returnUnauthorized(
-//                'You did not logged-in.'
-//            );
-//        }
-
+        if (!$this->getSession()->has('user')) {
+            return $this->returnUnauthorized(
+                'You did not logged-in.'
+            );
+        }
         // In post case
         if ($this->method === 'POST') {
             return $this->getPostResponseBody();
         }
 
-        $user = $this->getSession()->read('user') ?? ['id' => 'kei'];
+        $user = $this->getSession()->read('user');
         $userId = $user['id'];
         $directory = STORAGE_DIR . '/' . $userId;
 
@@ -96,23 +97,7 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
         $this->pushToProcedureStack(
             \Magnolia\Client\Camera::class,
             ProcedureKeys::CAPTURE_FAVORITE,
-            function (
-                Channel $procedure,
-                ?array $user,
-                ...$parameters
-            ) {
-                $id = $user['id'];
-                [ $packet ] = $parameters;
-                Storage::put(
-                    '/' . $id . '/' . date('Ymd') . '/' . time() . '.jpg',
-                    $packet,
-                    [
-                        'extension' => 'jpg',
-                        'time' => time(),
-                        'camera_number' => 0
-                    ]
-                );
-            },
+            CaptureFavorite::class,
             $this->getSession()->read('user')
         );
         return $this->returnOK();

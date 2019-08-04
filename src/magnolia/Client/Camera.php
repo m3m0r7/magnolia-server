@@ -20,6 +20,7 @@ final class Camera extends AbstractClient implements ClientInterface
     use \Magnolia\Traits\ClientManageable;
     use \Magnolia\Traits\ProcedureManageable;
     use \Magnolia\Traits\AuthKeyValidatable;
+    use \Magnolia\Traits\Redis;
 
     protected $loggerChannelName = 'Camera.Client';
 
