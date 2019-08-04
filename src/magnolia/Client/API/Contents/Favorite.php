@@ -37,7 +37,7 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
 
         foreach (glob($directory . '/*/*.meta.json') as $file) {
             $targetedDate = basename(dirname($file));
-            if (!preg_match('/^(\d{4})(\d{2})$/', $targetedDate, $matches)) {
+            if (!preg_match('/^(\d{4})(\d{2})(\d{2})$/', $targetedDate, $matches)) {
                 continue;
             }
             [, $year, $month] = $matches;
@@ -75,7 +75,7 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
         if ($this->getQuery()->get('mode') === 'static') {
             $id = $this->getSession()->read('user')['id'];
             Storage::put(
-                '/' . $id . '/' . date('Ym') . '/' . time() . '.jpg',
+                '/' . $id . '/' . date('Ymd') . '/' . time() . '.jpg',
                 file_get_contents(
                     Storage::getPath('/record/image.jpg')
                 ),
@@ -98,7 +98,7 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
                 $id = $user['id'];
                 [ $packet ] = $parameters;
                 Storage::put(
-                    '/' . $id . '/' . date('Ym') . '/' . time() . '.jpg',
+                    '/' . $id . '/' . date('Ymd') . '/' . time() . '.jpg',
                     $packet,
                     [
                         'extension' => 'jpg',
