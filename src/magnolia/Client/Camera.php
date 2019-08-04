@@ -96,6 +96,9 @@ final class Camera extends AbstractClient implements ClientInterface
                     );
                 }
 
+                // Run procedure
+                $this->proceedProcedure(ProcedureKeys::CAPTURE_FAVORITE, $packet);
+
                 // if channel is empty, don't proceed to send image packet to client.
                 // otherwise, send image packet to client in a coroutine.
                 if ($channel->isEmpty()) {
@@ -103,7 +106,6 @@ final class Camera extends AbstractClient implements ClientInterface
                 }
 
                 go(function () use ($packet, $channel, $synchronizer) {
-                    $this->proceedProcedure(ProcedureKeys::CAPTURE_FAVORITE, $packet);
                     $tempClientConnections = [];
                     while (!$channel->isEmpty()) {
                         /**
