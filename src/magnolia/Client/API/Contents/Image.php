@@ -20,7 +20,7 @@ final class Image extends AbstractAPIContents implements APIContentsInterface
 
         // ID is a timestamp
         $id = (int) $this->getQuery()->get('id');
-        $date = date('Ym', $id);
+        $date = date('Ymd', $id);
 
         $user = $this->getSession()->read('user');
         $userId = $user['id'];

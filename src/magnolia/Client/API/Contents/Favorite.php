@@ -40,9 +40,9 @@ final class Favorite extends AbstractAPIContents implements APIContentsInterface
             if (!preg_match('/^(\d{4})(\d{2})(\d{2})$/', $targetedDate, $matches)) {
                 continue;
             }
-            [, $year, $month] = $matches;
+            [, $year, $month, $day] = $matches;
 
-            $targetedDate = $year . $month;
+            $targetedDate = $year . $month . $day;
 
             if (!isset($files[$targetedDate])) {
                 $files[$targetedDate] = [];
