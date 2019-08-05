@@ -3,13 +3,17 @@ namespace Magnolia\Traits\Behaviors;
 
 use Magnolia\Client\API\Contents\AbstractAPIContents;
 use Magnolia\Contract\APIContentsInterface;
+use Magnolia\Enum\RedisKeys;
 
 class Session
 {
+    use \Magnolia\Traits\Redis;
+
     protected $APIContents;
     protected $sessionId = null;
     protected $sessions = [];
     protected $handle;
+    protected $lifecycle = 3600;
 
     public function __construct(AbstractAPIContents $APIContents)
     {
@@ -24,33 +28,30 @@ class Session
             getenv('SESSION_EXPIRES')
         );
 
-        // Expand session
-        $sessionFile = sys_get_temp_dir() . '/' . $this->getId();
-        $this->handle = fopen($sessionFile, 'c+');
+        $key = RedisKeys::SESSION . '_' .  $this->getId();
 
-        if (flock($this->handle, LOCK_EX)) {
-            $data = stream_get_contents($this->handle);
-            if (!empty($data)) {
-                $this->sessions = unserialize($data);
-            }
-            rewind($this->handle);
-            ftruncate($this->handle, strlen($data));
-            flock($this->handle, LOCK_UN);
-        }
+        $this->getRedis()->setnx(
+            $key,
+            serialize($this->sessions)
+        );
+
+        $this->sessions = unserialize(
+            $this->getRedis()->get($key)
+        );
 
         return $this;
     }
 
     public function emit()
     {
-        if (flock($this->handle, LOCK_EX)) {
-            rewind($this->handle);
-            fwrite(
-                $this->handle,
-                serialize($this->sessions)
-            );
-            flock($this->handle, LOCK_UN);
-        }
+        $key = RedisKeys::SESSION . '_' .  $this->getId();
+
+        $this->getRedis()->set(
+            $key,
+            serialize($this->sessions)
+        );
+
+        $this->getRedis()->expire($key, $this->lifecycle);
     }
 
     public function write($key, $value): self

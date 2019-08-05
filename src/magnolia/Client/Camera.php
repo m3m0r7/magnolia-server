@@ -154,7 +154,8 @@ final class Camera extends AbstractClient implements ClientInterface
             }
         } catch (StreamIOException $e) {
             $this->logger->info('Connection refuse to Camera. CameraReceiver will be shutdown.');
-            $this->disconnect();
         }
+
+        $this->disconnect();
     }
 }
