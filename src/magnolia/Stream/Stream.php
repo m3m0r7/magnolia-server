@@ -15,14 +15,12 @@ class Stream
     protected $chunk = true;
     protected $chunkSize = 8192 * 2;
     protected $disconnected = false;
-    protected $timeout = 1;
+    protected $timeout = 30;
 
     public function __construct($stream)
     {
         $this->stream = $stream;
 
-        // Set timeout.
-        stream_set_timeout($this->stream, $this->timeout);
         $this->peer = stream_socket_get_name(
             $stream,
             true
