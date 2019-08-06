@@ -15,7 +15,7 @@ class Stream
     protected $chunk = true;
     protected $chunkSize = 8192 * 2;
     protected $disconnected = false;
-    protected $timeout = 1;
+    protected $timeout = 30;
 
     public function __construct($stream)
     {
