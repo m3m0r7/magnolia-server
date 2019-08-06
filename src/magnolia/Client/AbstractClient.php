@@ -11,7 +11,7 @@ abstract class AbstractClient implements ClientInterface
 {
     protected $loggerChannelName = null;
     protected $logger;
-    protected $loggerLevel = Logger::INFO;
+    protected $loggerLevel = Logger::WARNING;
     protected $data = [];
     protected $channels = [];
     protected $synchronizers = [];
