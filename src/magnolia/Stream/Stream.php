@@ -21,8 +21,6 @@ class Stream
     {
         $this->stream = $stream;
 
-        // Set timeout.
-        stream_set_timeout($this->stream, $this->timeout);
         $this->peer = stream_socket_get_name(
             $stream,
             true
