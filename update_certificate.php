@@ -1,10 +1,14 @@
 <?php
-system('source ./.env');
+require __DIR__ . '/vendor/autoload.php';
+
+$env = Dotenv\Dotenv::create(__DIR__);
+$env->load();
+
 $based_directory = $_ENV['LILY_CERTIFICATE_BASED_DIRECTORY'] ?? null;
 $target = $_ENV['LILY_NGINX_TARGET'] ?? null;
 
 if ($based_directory === null || $target === null) {
-    echo "Please set envs LILY_CERTIFICATE_BASED_DIRECTORY and LILY_NGINX_TARGET.";
+    echo "Please set envs LILY_CERTIFICATE_BASED_DIRECTORY and LILY_NGINX_TARGET.\n";
     exit(1);
 }
 
